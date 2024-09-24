@@ -105,6 +105,30 @@
 
 
 ## AMI
+
+- overview:
+  - a customization of ec2: configure system, software
+  - built for a specific region
+  - launch ec2 instances from: public ami, custom ami, or aws marketplace ami
+- ami process: start ec2 instance, customize it, stop it, and make an ami, then launch instances from the ami
+- ami no-reboot option: by default, aws will shutdown the instance before taking an EBS snapshot and create an AMI. But we can choose no-reboot option, then the system buffer will not be sent to disk before the snapshot is created
+- aws backup plans to create ami:
+  - aws backup does not reboot the instance when taking ebs snapshot(no-reboot behavior)
+  - since it does not stop the instance while taking snapshot, so it is not guaranteed the file system integrity
+  - to maintain integrity, you need to provide `reboot` parameter while taking images( eventbridge + lambda + createImage api with reboot)
+- cross-account amia sharing: sharing does not affect the ownership of the ami.
+  - can only share amis without encrypted volumes or the volumes encrypted with CMK(you must share the CMK as well)
+- cross-account ami copy: if you copy the ami shared with you, then you are the new owner of the copy
+  - the owner of source ami must give read permission of the ebs snapshot which backs the ami
+  - if the backing snapshot is encrypted, then the owner must share the key
+- ec2 image builder
+  - used to automate the creation, maintain,validate, test of ami
+- ami in production
+  - force users to only launch ec2 with pre-approved amis(tagged with specific tags) using iam policies(using condition to check tags)
+  - combine with aws config to find non-compliant ec2 instances
+
+ 
+
 ## Manage EC2 at scale
 ## High availability and scalability
 ## Elastic Beanstalk
