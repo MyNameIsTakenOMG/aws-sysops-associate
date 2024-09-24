@@ -4,7 +4,7 @@
 
 - [EC2 for SysOps](#ec2-for-sysops)
 - [AMI](#ami)
-- [Manage EC2 at scale](#manage-ec2-at-scale)
+- [Manage EC2 at scale System manager](#manage-ec2-at-scale-system-manager)
 - [High availability and scalability](#high-availability-and-scalability)
 - [Elastic Beanstalk](#elastic-beanstalk)
 - [Cloudformation](#cloudformation)
@@ -129,7 +129,7 @@
 
  
 
-## Manage EC2 at scale (System Manager)
+## Manage EC2 at scale System manager
 
 - overview: help manage ec2 and on-prem systems; automation; detection; work for windows and linux; integrated with cloudwatch metrics; integrated with aws config
 - SSM agent: installed by default on aws linux ami; make sure the ec2 instances have a proper iam role to allow ssm actions
