@@ -129,7 +129,58 @@
 
  
 
-## Manage EC2 at scale
+## Manage EC2 at scale (System Manager)
+
+- overview: help manage ec2 and on-prem systems; automation; detection; work for windows and linux; integrated with cloudwatch metrics; integrated with aws config
+- SSM agent: installed by default on aws linux ami; make sure the ec2 instances have a proper iam role to allow ssm actions
+- aws Tags: a service that can add key-value pairs(tags) to other aws resources(like ec2), which can be used to group or identify resources, automation,... (better to have too many than too few)
+- create, view, manage logical group of resources thanks to `Tags`
+  - applications, different layers of app stack, prod vs dev env
+  - regional service
+  - ec2, s3, dynamodb, lambda...
+- ssm document: like scripts, but written in json or yml
+  - we define parameters, actions
+  - also there are existing aws documents
+- ssm run-command: execute ssm documents or just a command
+  - run command across multiple resources (resource group)
+  - rate control/error control
+  - integrated with iam, cloudtrail
+  - no need for ssh
+  - the output can be seen in the console, or sent to s3 or cloudwatch logs
+  - send notifications to sns
+  - can be invoked using eventbridge
+- ssm automation: Simplifies common maintenance and deployment tasks of EC2 instances and other AWS resources
+  - Automation runbook: ssm document of type automation
+  - pre-defined runbooks(aws) or create custom runbooks
+  - can be triggered: console, cli, sdk, eventbridge, on a schedule using `maintenance window`, aws config for rules remediations
+- ssm parameter store: secure storage for configuration and secret; notification with aws eventbridge; integrated with cloudformation
+- ssm parameter store hierarchy
+- ssm parameter store advanced
+  - parameter policies: allow to apply a TTL
+- ssm inventory
+  - collect metadata from your managed instances(ec2/on-prem)
+  - metadata: installed software, os driver, configurations, updates,...
+  - view data in aws console, or store in s3 and query using athena and quicksight
+  - specify the metadata collection interval
+  - can create custom inventory
+- ssm state manager
+  - automate the process of keeping your managed instances (ec2/on-prem) in a state that you define
+  - use cases: patch os/software updates on a schedule,...
+  - `state manager association`: Defines the state that you want to maintain to your managed instances. Specify a schedule when this configuration is applied
+  - Uses SSM Documents to create an Association (e.g., SSM Document to configure CW Agent)
+- ssm patch manager: Automates the process of patching managed instances
+  - Patch on-demand or on a schedule using Maintenance Windows
+  - Scan instances and generate patch compliance report (missing patches)
+  - Patch compliance report can be sent to S3
+  - patch baseline: Defines which patches should and shouldn’t be installed on your instances
+    - pre-define patch baseline: `AWS-RunPatchBaseline (SSM Document)` apply both operating system and application patches 
+    - custom patch baseline
+  - patch group: Associate a set of instances with a specific Patch Baseline; one patch group with one patch baseline
+- ssm maintenance window: Defines a schedule for when to perform actions on your instances
+- ssm session manager: Allows you to start a secure shell on your EC2 and on- premises servers. Does not need SSH access, bastion hosts, or SSH keys
+  - session logs: sent to s3 or cloudwatch logs
+
+
 ## High availability and scalability
 ## Elastic Beanstalk
 ## Cloudformation
