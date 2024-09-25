@@ -273,6 +273,21 @@
 
 
 ## Elastic Beanstalk
+
+- overview: a developer centric view of deploying an application on AWS. It uses components like ec2, asg, elb, rds,...
+  - managed service: handle underlying resources provisioning and configurations, just the application code is the responsibility of the dev
+  - we still have full control over the configuration
+- elastic beanstalk - components:
+  - application: a collection of versions, environments...
+  - application version: an iteration of your code
+  - environments: collection of aws resources running in an application version
+- web server tier vs worker tier
+  - web server tier: elb, asg, ec2
+  - worker tier: sqs, asg, ec2
+- elastic beanstalk deployment mode
+  - single instance for dev
+  - HA with load balancer for prod
+
 ## Cloudformation
 ## Lambda
 ## EC2 storage and data management
