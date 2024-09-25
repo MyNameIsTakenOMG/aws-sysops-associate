@@ -289,6 +289,78 @@
   - HA with load balancer for prod
 
 ## Cloudformation
+
+- overview: a declarative way of outlining your AWS Infrastructure, for any resources (most of them are supported)
+- benefits of cloudformation
+  - configurations can be version controlled
+  - each resource has a tag within the stack so that you can estimate the cost
+  - productivity: declarative, quickly recreate the stack
+  - separation of concern: multiple stacks
+  - existing templates (documention)
+- how cloudformation works
+  - templates uploaded to s3 bucket so that cloudformation can reference, then cloudformation will create stacks which will create resources
+  - to update a template, we have to upload a new version(cannot edit the current one)
+- deploy cloudformation templates
+  - manually --> cloudformation console
+  - automatically --> edit yml files, and use aws cli or CD tool to deploy your templates
+- cloudformation building block
+  - template's components:
+    - resources: such as `AWS::EC2::Subnet`,
+    - parameters: must provide when deploying the template. some options like `AllowedValues`, `Default`, `NoEcho`(boolean). Use **!Ref(Fn::Ref)** to reference the parameters. Also aws has offer some `pseudo parameters` to use
+    - mappings: fixed variables. to access map, use **Fn::FindInMap(!FindInMap)**: `!FindInMap [MapName,TopLevelKey, SecondLevelKey]`
+    - outputs: The Outputs section declares optional outputs values that we can import into other stacks (if you export them first)! Then later, in other template, we use function `Fn::ImportValue`
+    - conditions: used to control the creation of resources or outputs based on a condition (intrinsic function:logical). Conditions can be applied to resources / outputs / etc...
+    - aws template format version,...
+  - template's helpers: references, functions
+- cloudformation -- intrinsic functions
+  - Fn::Ref
+  - Fn::GetAtt
+  - Fn::FindInMap
+  - Fn::ImportValue
+  - Fn::Base64 (example, ec2 user data)
+  - condition functions
+- cloudformation rollback: creation/update fails, check the logs
+- cloudformation -- service role: `iam:PassRole` permission can be given to the users, who can then allows cloudformation to have enough permissions to work with resources
+- cloudformation -- capabilities:
+  - CAPABILITY_NAMED_IAM, CAPABILITY_IAM
+  - CAPABILITY_AUTO_EXPAND
+  - InsufficientCapabilitiesException
+- cloudformation deletion policy
+  - delete (be aware of s3 bucket)
+  - retain
+  - snapshot
+- cloudformation stack policy: During a CloudFormation Stack update, all update actions are allowed on all resources (default). A Stack Policy is a JSON document that defines the update actions that are allowed on specific resources during Stack updates. Protect resources from unintentional updates.
+- cloudformation termination protection: to protect the stack 
+- cloudformation -- custom resources
+  - used to define resources not supported by aws, define resources that can be outside of cloudformation, custom scripts run during create/update/delete through lambda function
+  - service token: specify where cloudformation sends request to, such as lambda, sns
+- cloudformation -- dynamic references: Reference external values stored in `Systems Manager Parameter Store` and `Secrets Manager` within CloudFormation templates
+  - option 1: ManageMasterUserPassword – creates admin secret implicitly (RDS, Aurora will manage the secret in Secrets Manager and its rotation)
+  - option 2: dynamic reference: create a secret, reference the secret in DB resource, then link the secret to the DB instance
+- cloudformation -- helper scripts(python scripts come with aws linux ami)
+  - Init: A config contains the following and is executed in that order -- packages(packages to download and install), groups, users, sources(download files), files(create files on the ec2), commands(commands to run), services(launch a list of sysvinit)
+  - cfn-init: Used to retrieve and interpret the resource metadata, installing packages, creating files and starting services
+  - cfn-signal & wait condition:
+    - run `cfn-signal` after `cfn-init`
+    - define a wait condition to block the template until it receives a signal from `cfn-signal`, we attach a `CreationPolicy` and `Count`
+- cloudformation -- nested stacks: best for re-usable configurations, and To update a nested stack, always update the parent (root stack).
+- cross stacks vs nested stacks:
+  - cross stacks: Helpful when stacks have different lifecycles. Use Outputs Export and Fn::ImportValue. When you need to pass export values to
+many stacks (VPC Id...)
+  - nested stacks: Helpful when components must be re-used. The nested stack only is important to the higher-level stack (it’s not shared)
+- cloudformation -- dependson
+  - Applied automatically when using !Ref and !GetAtt
+- cloudformation -- stackSets: Create, update, or delete stacks across multiple accounts and regions with a single operation/template
+- cloudformation -- stackSet permission models:
+  - self-managed permissions: admin account and trusted target accounts
+  - service-managed permissions: aws organization
+- cloudformation -- troubleshooting
+  - delete_failed
+  - update_rollback_failed
+- cloudformation -- stackSet troubleshooting
+  - a stack operation failed, and the stack instance status is OUTDATED: could be insufficient permissions, trying to create a global unique resources(s3), admin account has no trust relationship with target account, reached a limit (service quotas) in target account.
+
+
 ## Lambda
 ## EC2 storage and data management
 ## S3
