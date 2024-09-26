@@ -362,6 +362,39 @@ many stacks (VPC Id...)
 
 
 ## Lambda
+
+- overview: managed service, auto-scaling, short-execution, run on-demand
+- benefits: free tier, easy to increase RAM&CPU, integrated with other services, easy to monitor
+- s3 events notification
+- lambda execution role: Grants the Lambda function permissions to AWS services / resources
+  - When you use an event source mapping to invoke your function, Lambda uses the execution role to read event data.
+  - Best practice: create one Lambda Execution Role per function
+- lambda resource based policies: Use resource-based policies to give other accounts and AWS services permission to use your Lambda resources
+- lambda logging and monitoring
+  - cloudwatch logs (make sure lambda has permissions to write logs to the cloudwatch logs)
+  - cloudwatch metrics: invocations, durations, errors, throttles, deadlettererrors(failed to send events to dlq), iteratorAge(event source mapping reads from stream), concurrentExecution
+- lambda tracing with x-ray: need to enable, and sdk is required
+- lambda configuration
+  - RAM: from 128MB to 10GB in 1MB increments; The more RAM you add, the more vCPU credits you get; At 1,792 MB, a function has the equivalent of one full vCPU; After 1,792 MB, you get more than one CPU, and need to use multi-threading in your code to benefit from it (up to 6 vCPU)
+  - timeout: 3s - 900s
+- lambda execution context
+  - The execution context is a temporary runtime environment that initializes any external dependencies of your lambda code
+  - Great for database connections, HTTP clients, SDK clients...
+  - The execution context is maintained for some time in anticipation of another Lambda function invocation
+  - The next function invocation can “re-use” the context to execution time and save time in initializing connections objects
+  - The execution context includes the /tmp directory
+- lambda function /tmp space: 10GB max; use s3 if persistence is required; use KMS if encryption is required
+- lambda concurrency and throttling
+  - concurrency limit: 1000 (soft limit)
+  - reserved concurrency: at function level
+  - throttle behavior: synchronous(429 error), asynchronous(retry and retry interval increase exponentially from 1s to 5min, and then go to DLQ)
+  - concurrency issue: if do not set reserved concurrency, then other services may get impacted
+  - cold start(initialize dependencies, sdk,...) & provision concurrency(concurrency allocated, no cold start): 
+- lambda monitoring -- cloudwatch alarms
+- lambda monitoring -- cloudwatch logs
+- lambda monitoring -- cloudwatch logs insights
+  - Collects, aggregates, and summarizes: system-level metrics, diagnostic information
+
 ## EC2 storage and data management
 ## S3
 ## S3 advanced
