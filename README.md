@@ -396,6 +396,63 @@ many stacks (VPC Id...)
   - Collects, aggregates, and summarizes: system-level metrics, diagnostic information
 
 ## EC2 storage and data management
+
+- EBS: a network drive(like a network usb key) you can attach to your instances while they run. AZ-scoped, persist data, can only be attached to one instance at a time(CCP level), free tier: 30GB
+  - to move an ebs from one az to another, you need snapshot
+  - provisioned capacity
+- ec2 instance store: ebs has limited performance, while instance store is high-performance hardware disk.
+  - better I/O; ephemeral; good for cache, buffer...
+- ebs volume types:
+  - gp2/gp3: SSD general purpose, Cost effective storage, low-latency. System boot volumes,Virtual desktops, Development and test environments. gp3: IOPS and throughput are independent while gp2 is not
+  - io1/io2: SSD high performance. Great for databases workloads
+  - st1: HDD low cost HDD
+  - sc1: HDD lowest cost
+  - **note:** only gp2/gp3 and io1/io2 can be used as boot volume.
+- ebs multi-attach -- io1/io2 family
+  - Up to 16 EC2 Instances at a time
+  - Must use a file system that’s cluster-aware (not
+XFS, EXT4, etc...)
+- ebs volume resizing
+  - can only increase: ebs size, IOPS(io1)
+  - after resizing an ebs volume, we need to repartition the drive, and it is possible for the volume to be in the `optimization` phase for a long time, the volume is still usable
+  - cannot decrease the size, must create a new one and migrate data
+- ebs snapshot: no need to detach the volume to make a snapshot, but recommended. 
+- amazon data lifecycle manager: Automate the creation, retention, and deletion of EBS snapshots and EBS-backed AMIs.
+  - Schedule backups, cross-account snapshot copies, delete outdated backups, ...
+  - Uses resource tags to identify the resources (EC2 instances, EBS volumes)
+  - cannot manage snapshots/ami created outside DLM
+  - cannot manage instance store backed ami
+- ebs snapshot -- fast snapshot restore(fsr)
+  - by default, there is a latency of io when first time fetch snapshot block from s3 buckets
+  - solution:  force the initialization of the entire volume(use dd or fio command), or use fsr(create a volume from a snapshot fully initialized, but very expensive)
+- ebs snapshot features
+  - ebs snapshot archive: archive tier, 75% cheaper, but 24 - 72 hr to restore
+  - recycle bin for ebs snapshots: set up rule for retention for the deleted snapshots (1 day to 1 year)
+- ebs migration:  az-scoped, to move to another az, create a snapshot and copy to another az, then create a volume out of it
+- ebs encryption: all data at rest or in-transit are encrypted, all snapshots are encrypted as well. All are transparent.
+- ebs: encrypt an unencrypted volume
+  - create a snapshot first
+  - encrypt the snapshot(using copy)
+  - create a new volume out of the snapshot
+  - attach the new volume to the original instance
+- efs: managed network file system, can be mounted onto many ec2 instances; support multiple az, highly available, scalable, expensive.
+  - compatible with linux system
+  - scale: 1000s concurrent nfs client, 10GB+ throughput, grow up to pt-scale network
+  - performance mode (set at efs creation time): general purpose(cms,...) / max io(big data...)
+  - throughput mode: bursting(1 tb), provisioned(set throughput regardless of storage size), elastic(automatically scales throughput up or down based on your workloads)
+- efs storage classes
+  - storage tiers: standard(multi-az, good for prod), infrequent access, archive. implement lifecycle policies
+  - one zone: good for dev, backup enabled by default
+  - over 90% cost-saving
+- ebs vs efs
+  - ebs: root ebs volume will be terminated by default, but can be disabled
+  - efs: can be mounted onto multiple instances across az, only for linux
+- efs access point: can manage who can access which files or directories, specify different root directory
+- efs operations: lifecycle policies, throughput mode and provisioned mode, access point, or using datasync to migrate data to another efs (could be encrypted)
+- efs cloudwatch metrics: percentIOLimit; burstcreditBalance, storageBytes
+
+
+
 ## S3
 ## S3 advanced
 ## S3 security
