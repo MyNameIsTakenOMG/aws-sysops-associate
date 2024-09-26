@@ -451,9 +451,43 @@ XFS, EXT4, etc...)
 - efs operations: lifecycle policies, throughput mode and provisioned mode, access point, or using datasync to migrate data to another efs (could be encrypted)
 - efs cloudwatch metrics: percentIOLimit; burstcreditBalance, storageBytes
 
-
-
 ## S3
+
+- overview: 'infinitely scaling', host static website, integrated with other services
+- use cases: backup & restore, DR(disaster recovery), archive, big data analysis,...
+- s3 buckets: a regional resource, but its name needs to be unique globally, has naming convention
+- s3 objects: every object has a key which is the full path
+  - max object size is 5tb, and if uploading more than 5gb, must use `multi-part upload`
+  - metadata
+  - tags
+  - version id(if enabled)
+- s3 security:
+  - user-based: iam policies
+  - resource-based: bucket policies, object access control, bucket access control
+  - encryption:
+- s3 bucket settings for block public access: These settings were created to prevent company data leaks
+- s3 static website hosting
+- s3 versioning: enabled at the bucket level
+- s3 replication (CRR and SRR):
+  - must enable versioning in source and destination buckets
+  - cross-region replication
+  - same-region replication
+  - only new objects will be replicated after enabling replication. Or using s3 batch replication to replicate exsiting objects
+  - for delete operation: can replicate delete marker, deletion with a version id are not replicated
+  - there is no `chaining` of replication    
+- s3 storage classes: (move manually or s3 lifecycle configuration)
+  - standard: 99.99% availability
+  - standard IA
+  - one zone IA
+  - glacier instant retrieval: minimal storage duration 90 days, millisecond retrieval, query once a quarter
+  - glacier flexible retrieval: (1-5min, 3-5hrs, 5-12hrs), 90 days minimal
+  - glacier deep archive: 12 hrs, 48hrs(bulk), duration minimal 180 days
+  - intelligent tiering: Small monthly monitoring and auto-tiering fee, no retrieval fee, move objects automatically
+- s3 high durability and high availability
+
+
+
+
 ## S3 advanced
 ## S3 security
 ## Advanced storage solutions
