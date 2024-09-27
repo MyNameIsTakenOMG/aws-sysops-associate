@@ -649,6 +649,60 @@ want it to be high)
   - create a larger cache disk: Use the cached volume to clone a new volume of a larger size and use it as the cached volume
   
 ## Cloudfront
+
+- overview: Content Delivery Network (CDN). Improves read performance, content is cached at the edge. DDoS protection (because worldwide), integration with Shield, AWS Web Application Firewall
+- cloudfron origins
+  - s3 buckets: origin access control + s3 bucket policy
+  - custom origin(http): alb, ec2, s3 website, any http backend
+- cloudfront vs s3 cross-region replication
+  - cloudfront: global edge network, files cached for a ttl, great for static content available anywhere
+  - s3: read-only, must be setup for each region that needs replication. Great for dynamic content that needs to be available at low-latency in few regions
+- cloudfront geo restriction
+  - allowlist & blocklist
+  - determined by 3rd-party geo-ip DB
+- cloudfront access logs: Logs every request made to CloudFront into a logging S3 bucket
+  - It’s possible to generate reports on: usage report, viewer report, top referrers report, cache statistics report, popular objects report
+  - These reports are based on the data from the Access Logs.
+- cloudfront troubleshooting: CloudFront caches HTTP 4xx and 5xx status codes returned by S3 ( or the origin server)
+- cloudfront caching
+  - based on: headers, session cookies, query string parameters
+  - cache lives at the edge location
+  - to maximize the cache hit rate to minimize requests to the origin
+  - control ttl
+  - can invalidate part of cache using the CreateInvalidation API
+- cloudfront caching behavior for headers
+  - forward all headers to the origin: no caching, ttl=0
+  - forward a whitelist of headers: caching based on values in all the specified headers
+  - none: Forward only the default headers. no caching based on request headers. Best caching performance
+- cloudfront origin headers vs cache behavior
+  - origin custom header: origin-level setting, set a header for all requests to origin
+  - behavior setting: cache-related setting, contains a whitelist of headers to forward
+- cloudfront caching ttl
+  - “Cache-Control: max-age” is preferred to “Expires” header
+  - If the origin always sends back the header Cache-Control , then you can set the TTL to be controlled only by that header
+  - In case you want to set min/max boundaries, you choose “customize” for the Object Caching setting
+  - In case the Cache-Control header is missing, it will default to “default value”
+- cloudfront cache behavior of cookies(a specific request header)
+  - Default: do not process the cookies(Caching is not based on cookies. Cookies are not forwarded)
+  - Forward a whitelist of cookies(caching based on values in all the specified cookies)
+  - Forward all cookies(Worst caching performance)
+- cloudfront cache behavior for query string(Query Strings Parameters are in the URL)
+  - Default: do not process the query strings(Caching is not based on query strings. Parameters are not forwarded)
+  - Forward a whitelist of query strings(Caching based on the parameter whitelist)
+  - Forward all query strings(Caching based on all parameters)
+- cloudfront Maximize cache hits by separating static and dynamic distributions
+  - for static requests: No headers / session caching rules Required for maximizing cache hits
+  - for dynamic: Cache based on correct headers and cookie
+- cloudfront increase cache ratio
+  - Monitor the CloudWatch metric CacheHitRate
+  - Specify how long to cache your objects: Cache-Control max-age header
+  - Specify none or the minimally required headers/cookies/query string parameters
+  - Separate static and dynamic distributions (two origins)
+- cloudfront with alb sticky session
+  - Must forward / whitelist the cookie that controls the session affinity to the origin to allow the session affinity to work
+  - Set a TTL to a value lesser than when the authentication cookie expires
+
+
 ## Databases
 ## Monitoring and audit and performance
 ## Account management
