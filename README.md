@@ -554,6 +554,38 @@ operation)
 
 
 ## S3 security
+
+- s3 object encryption
+  - SSE s3-managed key (default): aes-256 type, must set header: "x-amz-server-side-encryption": "AES256"
+  - SSE aws-kms: using kms service, good for user control and audit using cloudtrail. Must set header "x-amz-server-side-encryption": "aws:kms"
+    - limits: kms quota: 5500, 10000,30000 requests/s 
+  - SSE customer-provided key: https must be used, and customers must store encryption key and provide in every http request header
+  - client-side encryption: use client libraries, such as `Amazon S3 Client-Side Encryption Library`. clients must encrypt/decrypt by themselves
+- s3 encryption in transit(SSL/TLS)
+  - for SSE-C, https is mandatory
+- s3  force encryption in transit by using bucket policy( condition: aws:SecureTransport)
+- s3 default encryption vs bucket policy
+  - NOTE: Bucket Policies are evaluated before “Default Encr yption”
+- s3 cors: If a client makes a cross-origin request on our S3 bucket, we need to enable the correct CORS headers. You can allow for a specific origin or for * (all origins)
+- s3 MFA delete: To use MFA Delete, Versioning must be enabled on the bucket. Only the bucket owner (root account) can enable/disable MFA Delete
+- s3 access logs: Any request made to S3, from any account, authorized or denied, will be logged into another S3 bucket. The target logging bucket must be in the same AWS region
+  - warning: Do not set your logging bucket to be the monitored bucket, or it will grow exponentially because of a logging loop
+- s3 pre-signed url: Generate pre-signed URLs using the S3 Console, AWS CLI or SDK
+- s3 glacier vault lock: adopt a write once read many model with a vault lock policy
+- s3 object lock(versioning is required)
+  - retention mode - compliance
+  - retention mode - governance
+  - retention period - can be extended
+  - legal hold: protect objects independently from retention period
+- s3 access point: simplify security management for S3 Buckets
+  - each access point has its own dns name
+  - access point policy like bucket policy (permissions + path)
+  - vpc origin: vpc endpoint(gateway endpoint or interface endpoint) to allow access to the target bucket and its access point
+- s3 multi-region access points: bi-directional s3 bucket replication rules, dynamic routing, failover controls
+- vpc endpoint gateway for s3
+  - for private subnet, use vpc endpoint gateway
+  - for public subnet, use internet gateway
+
 ## Advanced storage solutions
 ## Cloudfront
 ## Databases
