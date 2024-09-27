@@ -587,6 +587,67 @@ operation)
   - for public subnet, use internet gateway
 
 ## Advanced storage solutions
+
+- aws snow family: Highly-secure, portable devices to collect and process data at the
+edge, and migrate data into and out of AWS
+- snow family usage process:
+  - request snowball device
+  - install snowball client on the server
+  - connect the snowball to the server and start copying
+  - ship the device back to aws
+  - data will be loaded to s3 bucket and device will be wiped
+- edge computing: processing data at locations where internet is limited or no access to computing power.
+  - setup snowball, snowcone to do data process
+- aws fsx overview: Fully managed service, Launch 3rd party high-performance file systems on AWS
+- aws fsx for windows (file server)
+  - support SMB protocal and windows NTFS
+  - can be mounted on linux
+  - support Microsoft's Distributed File System (DFS) Namespaces
+- aws fsx for lustre: The name Lustre is derived from “Linux” and “cluster
+  - Machine Learning, High Performance Computing (HPC)
+  - Seamless integration with S3 (optional data repository)
+  - Can be used from on-premises servers (VPN or Direct Connect)
+  - File System Deployment Options: Scratch File System(data is not replicated), Persistent File System(Data is replicated within same AZ)
+- aws fsx for NetApp ONTAP: File System compatible with NFS, SMB, iSCSI protocol
+  - work with: linux, windows, macos, vmware cloud, ec2, ecs, eks, aws appstream, aws workspaces
+  - point-in-time cloning
+- aws fsx for OpenZFS: compatible with NFS
+  - work with: referencing to `fsx for netapp ontap`
+  - point-in-time cloning
+- fsx for sysops
+  - fsx for windows -- single az: automate replication data within one az. Two generations: Single-AZ 1 (SSD), Single-AZ 2 (SSD & HDD)
+  - fsx for windows -- multi az: Automatically replicates data across AZs (synchronous). Standby file server in a different AZ (automatic failover)
+- hybrid cloud for storage: S3 is a proprietary storage technology (unlike EFS / NFS), so using aws storage gateway
+- aws cloud storage native options:
+  - block: ebs, ec2 instance store
+  - file: efs, fsx
+  - object: s3, glacier
+- aws storage gateway: Bridge between on-premises data and cloud data. DR, backup&restore, tiered storage, on-prem cache & low-latency access
+  - s3 file gateway: configure using SMB/NFS procotol, lifecycle policy, iam permission, SMB integrated with microsoft AD
+  - fsx file gateway: native access to fsx for windows, natively compatible with SMB, NTFS,AD 
+  - volume gateway: block storage using iSCSI protocol backed by s3, backed by EBS snapshots. Cached volumes, Stored volumes
+  - tape gateway: VirtualTape Library (VTL) backed by Amazon S3 and Glacier
+- Storage Gateway – Hardware appliance: Using Storage Gateway means you need on-premises virtualization. Otherwise, you can use a Storage Gateway Hardware Appliance
+- storage gateway sysops
+  - File Gateway is POSIX compliant (Linux file system)
+  - Reboot Storage Gateway VM: (e.g., maintenance)
+    - File Gateway: simply restart the Storage GatewayVM
+    - Volume and Tape Gateway: Stop Storage Gateway Service; Reboot the Storage Gateway VM; Start Storage Gateway Service
+- storage gateway activation
+  - get activation key:
+    - Using the Gateway VM CLI
+    - Make a web request to the GatewayVM (Port 80)
+  - troubleshooting:
+    - make sure gateway VM has port 80 open
+    - check gateway VM has correct time and synchronize it with a Network Time Protocol (NTP) server
+- storage gateway -- volume gateway cache
+  - cache mode: only the most recent data is stored
+  - cache efficiency:
+    - Look at the CacheHitPercent metric (you
+want it to be high)
+    - Look at the CachePercentUsed (you don’t want it to be too high)
+  - create a larger cache disk: Use the cached volume to clone a new volume of a larger size and use it as the cached volume
+  
 ## Cloudfront
 ## Databases
 ## Monitoring and audit and performance
