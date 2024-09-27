@@ -486,9 +486,73 @@ XFS, EXT4, etc...)
 - s3 high durability and high availability
 
 
-
-
 ## S3 advanced
+
+- s3 moving between storage classes
+  - moving objects can be automated using `lifecycle rules`
+  - ordering: standard, standard IA, intelligent tier, one-zone IA, glacier instant retrieval, glacier flexible retrieval, glacier deep archive
+- s3 lifecycle rule: can be created for a certain prefix, or certain object tags
+  - transition actions: configure objects to transition to another storage class
+  - expiration actions: configure objects to expire (delete) after some time, can be used to delete incomplete Multi-Part uploads or old versions of objects
+- s3 analytics -- storage class analysis: Help you decide when to transition objects to the right storage class
+  - Recommendations for Standard and Standard IA: does not work for one-zone IA or glacier
+  - Good first step to put together Lifecycle Rules
+  - 24-48 to see the data analysis
+  - report daily
+- s3 event notifications:
+  - lambda (resource policy)
+  - sqs (resource policy)
+  - sns (resource policy)
+  - eventbridge (advanced filtering, multi-destinations, eventbridge capabilities)
+- s3 baseline performance
+  - automatically scale
+  - 3500 put/copy/post/delete or 5500 get/head requests per second per prefix in a bucket (tip: instead of using root path of prefix, separate each subpath to have more throughput)
+  - no limits to the number of prefixes in a bucket
+- s3 performance
+  - multi-part upload: recommended for files > 100MB, must use for files > 5GB. parallelize uploading
+  - s3 transfer acceleration: upload files to the aws edge locations which will forward to the s3 buckets (compatible with multi-part upload)
+  - S3 Byte-Range Fetches: Parallelize GETs by requesting specific byte ranges. Better resilience in case of failures.
+    - Can be used to speed up downloads.
+    - Can be used to retrieve only partial data (for example the head of a file)
+- s3 batch operations
+  - work with s3 inventory(get object list), s3 select(filter your objects)
+  - A job consists of a list of objects, the action to perform, and optional parameters
+- s3 inventory: List objects and their corresponding metadata (alternative to S3 List API
+operation)
+  - generate daily or weekly report which can be filtered by s3 select
+  - the output files: CSV, ORC, or apache parquet which can be queried by athena, redshift, presto, hive, spark,...
+- s3 glacier: Low-cost object storage meant for archiving / backup
+  - Each item in Glacier is called “Archive” (up to 40TB)
+  - Archives are stored in ”Vaults”
+- s3 glacier operations
+  - vault operations: create&delete, retrieving metadata, download inventory
+  - glacier operations: upload, download, delete
+  - restore links have an expiry date
+  - retrieval options:
+    - expedited (1-5 mins)
+    - standard (3-5 hrs)
+    - bulk (5-12 hrs)
+- s3 vault policies and vault lock
+  - each vault has one vault access policy(like bucket policy) and vault lock policy( for regulatory and compliance requirements)
+- s3 notifications for restore operations
+  - vault notification configuration: Configure a vault so that when a job completes, a message is sent to SNS. Optionally, specify an SNS topic when you initiate a job.
+  - s3 event notification: S3 supports the restoration of objects archived to S3 Glacier storage classes. Notify when restore job initiated, or notify when restore job is completed
+- s3 multi-part upload: (max parts: 10000)
+  - Recommended for files > 100MB, must use for files > 5GB 
+  - failures: restart the failed parts
+  - can use lifecycle policy to automate old parts deletion of unfinished upload after x days
+- athena: Serverless query service to analyze data stored in Amazon S3
+  - Uses standard SQL language to query the files (built on Presto)
+  - Supports CSV, JSON, ORC, Avro, and Parquet
+  - work with aws quicksight
+- athena performance improvement
+  - use `columnar data`: apache parquet or ORC is recommended. use aws glue to convert data to parquet or ORC
+  - compress data for smaller retrievals(gzip, bzip2,...)
+  - partition datasets for easy querying
+  - use larger files (> 128MG) to minimize overhead
+- athena federated query: Uses Data Source Connectors that run on AWS Lambda to run Federated Queries (e.g., CloudWatch Logs, DynamoDB, RDS, ...), and then store results back to s3 buckets
+
+
 ## S3 security
 ## Advanced storage solutions
 ## Cloudfront
