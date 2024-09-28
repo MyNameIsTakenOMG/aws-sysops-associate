@@ -835,9 +835,137 @@ want it to be high)
   - currconnections
   - freeablememory
 
-
-
 ## Monitoring and audit and performance
+
+- cloudwatch metrics overview:
+  - metrics is a variable to monitor
+  - metrics belong to namespaces
+  - dimension is an attribute(or identifier) of a metric
+  - metrics have timestamp
+- ec2 detailed monitoring (1 min interval, a bit costy)
+  - aws free tier allows us to have 10 detailed monitoring metrics
+  - Note: EC2 Memory usage is by default not pushed (must be pushed from inside the instance as a custom metric)
+- cloudwatch custom metrics
+  - example: memory(RAM), use api call putMetricData
+  - able to use dimensions to segment metrics
+  - metric resolution: standard 1 min, the higher the more costy
+  - Important: Accepts metric data points two weeks in the past and two hours in the future (make sure to configure your EC2 instance time correctly)
+- cloudwatch dashboard
+  - global
+  - can include graphs from different AWS accounts and regions
+- cloudwatch logs
+  - log group
+  - log stream
+  - log expiration
+  - cloudwatch logs can send logs to s3(exports), kinesis, lambda, opensearch
+  - encrypted by default, can be encrypted using custom key
+  - log sources: sdk, cloudwatch agent, elastic beanstalk, ecs, aws lambda, vpc flow logs, api gateway, cloudtrail, route53
+- cloudwatch log insights: Search and analyze log data stored in CloudWatch Logs
+  - Provides a purpose-built query language
+  - Can query multiple Log Groups in different AWS accounts
+  - a query engine, not a real-time engine
+- cloudwatch logs to s3(export): can take up to 12 hrs, not real-time or near real-time
+- cloudwatch logs subcription
+  - get a real-time log events from cloudwatch logs for processing and analysis: kinesis( data firehose -> s3), lambda
+  - Subscription Filter – filter which logs are events delivered to your destination
+  - Cross-Account Subscription – send log events to resources in a different AWS account (KDS, KDF)
+- cloudwatch logs aggregation multi-account and multi-region
+- cloudwatch alarms
+  - various options to define thresholds
+  - states: ok, insufficient_data, alarm
+  - period: Length of time in seconds to evaluate the metric
+  - target: ec2, asg, sns(from which, we can anything we want to do)
+  - composite alarms:
+    - alarms are on a single metric. Composite Alarms are monitoring the states of multiple other alarms.
+    - AND and OR conditions.
+    - Helpful to reduce “alarm noise” by creating complex composite alarms
+- ec2 instance recovery
+  - status check: instance status, system status, ebs status
+  - recovery: Same Private, Public, Elastic IP, metadata, placement group
+- cloudwatch alarm: good to know
+  - alarms can be created based on CloudWatch Logs Metrics Filters
+  - To test alarms and notifications, set the alarm state to Alarm using CLI
+- cloudwatch synthetics canary
+  - configurable script that monitor your APIs, URLs, Websites, ...
+  - Reproduce what your customers do programmatically to find issues before customers are impacted
+  - integrated with cloudwatch alarm, written in nodejs or python
+  - Programmatic access to a headless Google Chrome browser
+  - Can run once or on a regular schedule
+- CloudWatch Synthetics Canary Blueprints
+  - heartbeat monitor
+  - api canary
+  - broken link checker
+  - visual monitoring
+  - canary recorder
+  - gui workflow builder
+- aws eventbridge: schedule(cron job), event pattern(event rules to react events), trigger lambda function, send sqs/sns message,...
+- eventbridge event bus:
+  - Event buses can be accessed by other AWS accounts using Resource-based Policies
+  - You can archive events (all/filter) sent to an event bus (indefinitely or set period)
+  - Ability to replay archived events
+- eventbridge schema registry:
+  - EventBridge can analyze the events in your bus and infer the schema.
+  - The Schema Registry allows you to generate code for your application, that will know in advance how data is structured in the event bus
+  - schema can be versioned
+- eventbridge resource-based policy: Manage permissions for a specific Event Bus
+- service quotas cloudwatch alarms: create an alarm on the service quotas console to notify you when you are close to a service quota value threshold
+  - Alternative:Trusted Advisor + CW Alarms
+    - Limited number of Service Limits checks in Trusted Advisor (~50)
+    - Trusted Advisor publishes its check results to CloudWatch
+    - You can create CloudWatch Alarms on service quota usage (Service Limits)
+- aws cloudtrail(enabled by default)
+  - Get an history of events / API calls made within your AWS Account
+  - Provides governance, compliance and audit for your AWS Account
+  - Can put logs from CloudTrail into CloudWatch Logs or S3
+- cloudtrail events:
+  - management events:Operations that are performed on resources in your AWS account
+  - Data Events: By default, data events are not logged (because high volume operations)
+  - CloudTrail Insights Events: Enable CloudTrail Insights to detect unusual activity in your account. CloudTrail Insights analyzes normal management events to create a baseline. And then continuously analyzes write events to detect unusual patterns.
+    - cloudtrail console, s3, eventbridge
+- cloudtrail events retention:
+  - 90 days, could send to s3 using athena to do analysis
+- cloudtrail log files integrity validation
+  - digest files: References the log files for the last hour and contains a hash of each. store files in s3 bucket
+  - help determine if files have been modified since being delivered by cloudtrail
+- cloudtrail and eventbridge
+  - used to react to any api calls
+  - cloudtrail is not real-time:
+    - log files to s3: every 5 min
+    - event: within 15 min
+- cloudtrail organization trail: A trail that will log all events for all AWS accounts in an AWS Organization
+  - Member accounts can’t remove or modify the organization trail (view only)
+- aws config
+  - Helps with auditing and recording compliance of your AWS resources
+  - Helps record configurations and changes over time
+  - You can receive alerts (SNS notifications) for any changes
+  - a per-region service
+- config rules
+  - aws managed rules(over 75)
+  - custom rules
+  - rules can be evaluated/triggered when config changes or at regular intervals
+  - AWS Config Rules does not prevent actions from happening (no deny)
+  - no free tier
+- aws config resource
+  - View compliance of a resource over time
+  - View configuration of a resource over time
+  - View CloudTrail API calls of a resource over time
+- config rules - remediations
+  - Automate remediation of non-compliant resources using SSM Automation Documents
+  - Use AWS-Managed Automation Documents or create custom Automation Documents (create a custom automation document to invoke lambda)
+  - can set remediation retries
+- config rules - notifications
+  - using eventbridge to react to events of non-compliant
+  - Ability to send configuration changes and compliance state notifications to SNS (all events – use SNS Filtering or filter at client-side)
+- config - aggregator
+  - The aggregator is created in one central aggregator account
+  - If using AWS Organizations, no need for individual Authorization
+  - Rules are created in each individual source AWS account
+  - Can deploy rules to multiple target accounts using CloudFormation StackSets
+- cloudwatch vs cloudtrail vs config
+  - cloudwatch: performance monitoring, events, alarm, logging, analysis
+  - cloudtrail: record api calls, global service, enabled by default
+  - config: Record configuration changes, Evaluate resources against compliance rules,Get timeline of changes and compliance
+
 ## Account management
 ## Disaster recovery
 ## Security and compliance
