@@ -704,6 +704,139 @@ want it to be high)
 
 
 ## Databases
+
+- aws rds(Relational Database Service) overview: managed service, support multiple database engines: postgres, mysql, oracle, microsoft sql server, aurora
+  - note: you cannot ssh into the db instance
+  - point-in-time-restore, os patching, multi-az for DR, horizontal and vertical scalability,...
+- rds storage auto-scaling(when db instance runs out of free storage): can set Maximum storage threshold; useful for applications with unpredictable workloads; support all rds db engines
+- rds read replicas for read scalability:
+  - only for read
+  - up to 15;
+  - within az, cross az or cross region;
+  - replication is async;
+  - replicas can be promoted to their own db
+  - apps must update the connection string to leverage read replicas
+  - use case: use a replica to do data analysis without affecting the main instance
+- rds read replicas network cost: same region free, cross region will be charged
+- rds multi az (for Disaster recovery)
+  - sync replication
+  - acive-passive, standby, one domain name
+  - auto-failover
+    - condition: the main db instance(os is under software patching, db instance is modified,...), the az is down; a manual failover 
+  - note: read replicas can be set as multi az for DR
+- rds from single az to multi az
+  - zero downtime
+  - click `modify` on the db, then a snapshot is taken, then a new db instance is created from it, then the synchronization is established
+- lambda and rds:
+  - lambda by default is launched in aws public network, it cannot connect to rds. so it is needed to be in the same vpc where the rds is, then an ENI will be created and configured by aws automatically
+- rds proxy for aws lambda: The Lambda function must have connectivity to the Proxy (public proxy => public Lambda, private proxy => Lambda in VPC)
+  - also, With RDS Proxy, you no longer need code that handles cleaning up idle connections and managing connection pools, which can avoid the issue TooManyConnections
+- db parameter groups
+  - Dynamic parameters are applied immediately
+  - Static parameters are applied after instance reboot
+  - Must-know parameter:
+    - PostgreSQL / SQL Server: rds.force_ssl=1 => force SSL connections
+    - MySQL / MariaDB: require_secure_transport=1 => force SSL connections
+- rds backup vs snapshot
+  - rds backup: backup is continuous and allow point in time recovery; having retention from 0 to 35 days; to disable backups, set retention to 0
+  - snapshot: will stop the db instance for some time when taking snapshots; snapshots taken on multi az will not affect main db; snapshots are incremental
+  - rds backup or snapshot will create a new db instance when restoring from them
+- rds snapshot sharing
+  - manual snapshots: yes
+  - automated snapshot: no, needs to be copied first
+  - can only share unencrypted snapshots or the ones encrypted by custom managed key(need to share the key as well)
+- rds events & event subscription
+  - rds keeps records of db instance, snapshots, parameter groups,...
+  - subscription: sns
+  - rds delivers events to eventbridge
+- rds db logs: sent to cloudwatch logs, use metric filter to create metrics and set alarms on them
+- rds with cloudwatch
+  - cloudwatch metrics
+  - enhanced monitoring(gathered from an agent on the db instance) 
+- rds performance insight: Visualize your database performance and analyze any issues that affect it
+  - With the Performance Insights dashboard, you can visualize the database load and filter the load: waits/sql statements/hosts/users
+- aws aurora overview: proprietary db from aws(not open source)
+  - Postgres and MySQL are both supported as Aurora DB (that means your drivers will work as if Aurora was a Postgres or MySQL database)
+  - aurora costs more than rds(20%), but more efficient
+- aurora high availability and read scaling
+  - 6 copies across 3 regions
+    - 4 of 6 needed for writes
+    - 3 of 6 needed for reads
+    - self-healing
+  - automated failover
+  - up to 15 read replicas
+  - support for cross region replication
+- aurora db cluster
+  - writer endpoint
+  - read endpoint
+- aurora features: auto-failover; backup & recovery; backtrack: restore data at the any point of time without using backups,...
+- backups, backtracking and restores in aurora
+  - auto backup: PITR, 1-35 retention, restore to a new db cluster
+  - backtracking: only support aurora mysql, do not create a new db cluster, rewind db cluster back and forth 72 hrs
+  - aurora db cloning: clone a new db cluster using copy-on-write protocol 
+- aurora for sysops
+  - You can associate a priority tier (0-15) on each Read Replica
+    - Controls the failover priority
+    - RDS will promote the Read Replica with the highest priority (lowest tier)
+    - If replicas have the same priority, RDS promotes the largest in size
+    - If replicas have the same priority and size, RDS promotes arbitrary replica
+  - You can migrate an RDS MySQL snapshot to Aurora MySQL Cluster
+- aurora cloudwatch metrics: AuroraReplicaLag, DatabaseConnections, ...
+- rds & aurora security
+  - at-rest encryption: master & replicas use aws kms(defined at the launch time), if master not encrypted, then replicas not either, to encrypt an unencrypted db, go with snapshots
+  - in-flight encryption: tls by default
+  - security group
+  - iam authentication
+  - no ssh, except for rds custom
+  - audit logs can be enabled and sent to cloudwatch
+- elasticache overview: managed service for redis and memcached the same way as rds for relational dbs
+- elasticache solution architecture:
+  - db cache: Cache must have an invalidation strategy to make sure only the most current data is used in there.
+  - user sessions store: backend services or apps write or retrieve user session data from elasticache   
+- elasticache: redis vs memcached
+  - redis: multi az, read replicas, high availability, data persistence, backup and restore, support sets and sorted sets
+  - memcached: multi node partition, no HA, no backup and restore, no persistence, multi-threading architecture
+- elasticache replication: cluster mode disabled
+  - one shard: one main node, multi replicas nodes(up to 5), async replication, multi az by default for failover
+- elasticache replication: cluster mode enabled
+  - Data is partitioned across shards (helpful to scale writes)
+  - up to 500 nodes per cluster(shards)
+- elasticache for redis auto scaling
+  - Automatically increase/decrease the desired shards or replicas
+  - Supports both Target Tracking and Scheduled Scaling Policies
+  - Works only for Redis with Cluster Mode Enabled
+- elasticache redis connection endpoints
+  - standalone node: one endpoint for read/write
+  - cluster mode disabled: primary endpoint(write),reader endpoint(read),node endpoint(read)
+  - cluster mode enabled: configuration endpoint(read/write), node endpoint(read)
+- redis scaling: cluster mode disabled
+  - horizontal: add/remove replicas
+  - vertical: create a new node group with different node size
+- redis scaling: cluster mode enabled
+  - two mode: online scaling; offline scaling
+  - horizontal: resharding, shard rebalancing, support online and offline scaling 
+  - vertical: change read/write capacity. support online scaling
+- redis metrics: evictions(evict LRU items, scale up/out), cpuutilization(scale up/out), swapusage: should not exceed 50 MB (verify there is enough reserved memory)
+  - currconnections
+  - databaseMemoryUsagepercentage
+  - NetworkBytesIn/Out & NetworkPacketsIn/Out
+  - ReplicationBytes
+  - ReplicationLag
+- memcached scaling
+  - memcached cluster (1-40 nodes)
+  - horizontal:
+    - add/remove nodes;
+    - auto-discovery allow your app to find nodes automatically. All the cache nodes in the cluster maintain a list of metadata about all other nodes. This is seamless from a client perspective
+  - vertical: Memcached clusters/nodes start out empty. scale up process: create a new cluster, update the app to use new cluster endpoint, delete the old cluster
+- memcached metrics:
+  - evicions
+  - cpuutilization
+  - swapusage: should not exceed 50 MB
+  - currconnections
+  - freeablememory
+
+
+
 ## Monitoring and audit and performance
 ## Account management
 ## Disaster recovery
