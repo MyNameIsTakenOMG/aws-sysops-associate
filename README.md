@@ -967,6 +967,89 @@ want it to be high)
   - config: Record configuration changes, Evaluate resources against compliance rules,Get timeline of changes and compliance
 
 ## Account management
+
+- aws health dashboard
+  - service history: Shows all regions, all services health. Shows historical information for each day
+  - your account(the ringbell icon): provides aler ts and remediation guidance when AWS is experiencing events that may impact you, which gives you a personalized view into the performance and availability of the AWS services underlying your AWS resources.
+    - The dashboard displays relevant and timely information to help you manage events in progress and provides proactive notification to help you plan for scheduled activities.
+    - Can aggregate data from an entire AWS Organization
+    - Alert, remediation, proactive, scheduled activities
+    - global service
+  - health event notifications: Use EventBridge to react to changes for AWS Health events in your AWS account( to trigger lambda, sns, sqs, kinesis)
+- aws organizations overview:
+  - global service
+  - can manage multi aws accounts(member accounts) with a management account (main account)
+  - single payment method(consolidated billing)
+  - shared reserved instances and saving plans discount across accounts
+  - pricing benefits from aggregated usage
+  - api is available to automate aws account creation
+- aws organization -- organizational unit(OU)
+  - business units
+  - environment units
+  - project units
+- aws organization advantages and security
+  - advantages:
+    - multi-accounts vs multi-vpc
+    - cloudtrail sends logs to a central s3 buckets
+    - cloudwatch sends logs to a central logging account
+    - Use tagging standards for billing purposes
+    - Establish Cross Account Roles for Admin purposes
+  - security: service control policies(scp)   
+    - iam policies applied on OUs and member accounts
+    - They do not apply to the management account (full admin power)
+    - Must have an explicit allow from the root through each OU in the direct path to the target account (does not allow anything by default – like IAM)
+- aws organization SCP hierarchy
+- aws organization reserved instances:
+  - For billing purposes, the consolidated billing feature of AWS Organizations treats all the accounts in the organization as one account, which means all accounts in the organization can receive the hourly cost benefit of Reserved Instances that are purchased by any other account.
+  - The payer account (master account) of an organization can turn off Reserved Instance (RI) discount and Savings Plans discount sharing for any accounts in that organization, including the payer account, which means RIs and Savings Plans discounts aren't shared between any accounts that have sharing turned off.
+  - To share an RI or Savings Plans discount with an account, both accounts must have sharing turned on.
+- aws organization iam policies
+  - Use aws:PrincipalOrgID condition key in your resource-based policies to restrict access to IAM principals from accounts in an AWS Organization (like s3 bucket policy)
+- aws organization tag policies: Helps you standardize tags across resources in an AWS Organization
+  - Ensure consistent tags, audit tagged resources, maintain proper resources categorization, ...
+  - Helps with AWS Cost Allocation Tags and Attribute-
+based Access Control
+  - Prevent any non-compliant tagging operations on specified services and resources (has no effect on resources without tags)
+  - Generate a report that lists all tagged/non-compliant resources. And use cloudwatch events to monitor non-compliant tags
+- aws control tower: Easy way to set up and govern a secure and compliant multi-account AWS environment based on best practices
+  - runs on top of aws organizations and automatically sets up AWS Organizations to organize accounts and implement SCPs (Service Control Policies)
+  - benefits:
+    - Monitor compliance through an interactive dashboard
+    - Detect policy violations and remediate them
+    - Automate ongoing policy management using guardrails
+    - Automate the set up of your environment in a few clicks
+- aws service catalog: users just want a quick self-service portal to launch a set of authorized products pre-defined by admins
+  - portfolio: collections of products (cloudformation templates) with iam permissions to control access
+  - sharing catalog: Share a reference of the portfolio, then import the shared portfolio in the recipient account (stays in-sync with the original
+por tfolio); Deploy a copy of the portfolio into the recipient account (must re-deploy any updates)
+  - tagOptions library: Easily manage tags on provisioned products. managed in service catalog. Can be associated with Portfolios and Products
+- aws billing alarms
+  - Billing data metric is stored in CloudWatch us-east-1
+  - Billing data are for overall worldwide AWS costs
+  - It’s for actual cost, not for project costs
+- cost explorer: Visualize, understand, and manage your AWS costs and usage over time
+  - can create custom report
+  - Choose an optimal Savings Plan (to lower prices on your bill)
+  - Forecast usage up to 12 months based on previous usage
+- aws budget: Create budget and send alarms when costs exceeds the budget
+  - 4 types of budgets: Usage, Cost, Reservation, Savings Plans
+  - Up to 5 SNS notifications per budget
+  - Can filter by: az, region, tag, service,...
+- cost allocation tags: Use cost allocation tags to track your AWS costs on a detailed level
+  - aws generated tags: automatically apply to the resources you created, prefix: aws:
+  - user-defined tags: prefix: user:
+- cost and usage report: Dive deeper into your AWS costs and usage
+  - The AWS Cost & Usage Report contains the most comprehensive set of AWS cost and usage data available.
+  - Includes additional metadata about AWS services, pricing, and reservations (e.g., Amazon EC2 Reserved Instances (RIs))
+  - Can be configured for daily exports to S3
+  - Can be integrated with Athena, Redshift or QuickSight
+- aws compute optimizer: Reduce costs and improve performance by recommending optimal AWS resources for your workloads
+  - Helps you choose optimal configurations and right- size your workloads (over/under provisioned)
+  - Uses Machine Learning to analyze your resources’ configurations and their utilization CloudWatch metrics
+  - Recommendations can be exported to S3
+  - lower costs up to 25%
+  - supported resources: ec2, ec2 asg, ebs, lambda
+
 ## Disaster recovery
 ## Security and compliance
 ## Identity
