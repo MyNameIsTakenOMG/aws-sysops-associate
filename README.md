@@ -1072,6 +1072,183 @@ por tfolio); Deploy a copy of the portfolio into the recipient account (must re-
   - Even the root user cannot delete backups when enabled
 
 ## Security and compliance
+
+- aws shared responsibility model
+  - AWS responsibility - Security of the Cloud: managed services, protecting infra
+  - Customer responsibility - Security in the Cloud: network, iam, firewall, encryption,...
+  - Shared controls: Patch Management, Configuration Management, Awareness & Training
+- DDoS protection on AWS
+  - aws shield standard: protects against DDoS attack for your website and applications
+  - aws shield advanced: 24/7 premium DDoS protection
+  - aws waf: Filter specific requests based on rules
+  - cloudfront and route 53: using global edge network
+  - Be ready to scale – leverage AWS Auto Scaling
+- aws shield
+  - standard: free service, provide protection for attacks like SYN/UDP Floods, Reflection attacks and other layer 3/layer 4 attacks
+  - advanced: Optional DDoS mitigation service. Protect against more sophisticated attacks on elb, cloudfront, ec2, route53,...
+    - Protect against higher fees during usage spikes due to DDoS
+    - 24/7 access to AWS DDoS response team (DRP)
+- aws waf
+  - protects apps from layer 7(http) attacks
+  - deploy on alb, cloudfront, api gateway
+  - web ACL (access control list)
+    - rate-based rules for DDoS
+    - Size constraints, geo-match (block countries)
+    - Rules can include: IP addresses, HTTP headers, HTTP body, or URI strings
+    - Protects from common attack - SQL injection and Cross-Site Scripting (XSS)
+- penetration test on aws cloud: AWS customers are welcome to carry out security assessments or penetration tests against their AWS infrastructure without prior approval for 8 services: ec2, rds, aurora, cloudfront, api gateway, lambda and lambda edge functions, lightsail, elastic beanstalk
+  - Prohibited Activities: port flooding, protocol flooding, request flooding, DDoS, DNS zone walking via Amazon Route 53 Hosted Zones.
+- aws inspector: Automated Security Assessments
+  - ec2 instances
+  - container images push to the ecr
+  - lambda functions
+  - reporting & integration with aws security hub
+  - send findings to aws eventbridge
+  - continuous scanning infra if needed
+  - package vulnerability(lambda, ecr, ec2)
+  - network reachability(ec2)
+  - A risk score is associated with all vulnerabilities for prioritization
+- logging in aws security and compliance
+  - service logs:
+    - cloudtrail trails
+    - config rules
+    - cloudwatch logs
+    - vpc flow logs
+    - elb access logs
+    - cloudfront logs
+    - waf logs
+  - logs can be analyzed by athena when they are stored in s3 buckets
+  - You should encrypt logs in S3, control access using IAM & Bucket Policies, MFA
+  - Move Logs to Glacier for cost savings
+- aws guardduty: Intelligent Threat discovery to protect your AWS Account. Uses Machine Learning algorithms, anomaly detection, 3rd party data. no software needs to be installed
+  - input data includes:
+    - cloudtrail events logs
+    - vpc flow logs
+    - dns logs
+    - other logs(optional): eks audit logs, ebs, lambda,...
+  - Can protect against CryptoCurrency attacks (has a dedicated “finding” for it)
+  - set up eventbridge rules to be notified by any findings
+- aws macie: a managed service, uses machine learning and pattern matching to discover and protect your sensitive data in AWS. Macie helps identify and alert you to sensitive data, such as personally identifiable information (PII) in s3 buckets
+  - integrated with eventbridge
+- trusted advisor: no software needs to be installed. high level AWS account assessment.
+  - recommendation on:
+    - cost optimization
+    - performance
+    - security
+    - fault tolerance
+    - service limits
+    - operational excellence
+  - besiness and enterprise support plan: full set of checks, Programmatic Access using AWS Support API
+- aws kms overview:
+  - aws manages encryption keys for us
+  - fully integrated with iam
+  - seamlessly integrated with other services: rds, ssm,...
+  - Never ever store your secrets in plaintext, especially in your code!
+- aws kms keys types:
+  - symmetric(AES-256 keys): Single encryption key that is used to Encrypt and Decrypt. AWS services that are integrated with KMS use Symmetric CMKs. You never get access to the KMS Key unencrypted (must call KMS API to use)
+  - asymmetric(RSA & ECC key pairs): Public (Encrypt) and Private Key (Decrypt) pair. The public key is downloadable, but you can’t access the Private Key unencrypted
+- types of kms keys:
+  - AWS Owned Keys (free): SSE-S3, SSE-SQS, SSE-DDB (default key)
+  - AWS Managed Key: free (aws/service-name, example: aws/rds or aws/ebs)
+  - Customer managed keys created in KMS: $1 / month
+  - Customer managed keys imported: $1 / month
+- automatic key rotation:
+  - AWS-managed KMS Key: automatic every 1 year
+  - Customer-managed KMS Key: (must be enabled) automatic & on-demand
+  - Imported KMS Key: only manual rotation possible using alias
+- kms key policies: similar to s3 bucket policies but the difference is you cannot control access without them.
+  - default key policy: access for entire aws account
+  - custom kms key policy: define users, roles and who can administer the key. good for cross-account access
+- copying snapshot across accounts: do not forget to attach a kms key policy to authorize cross-account access
+- kms automatic key rotation
+  - AWS-managed KMS Keys: automatically rotated every 1 year
+  - For Customer-Managed `Symmetric KMS Key`: key rotation is optional, rotation period is between 90-2560 days, Previous key is kept active so you can decrypt old data, New Key has the same KMS Key ID (only the backing key is changed)
+    - on-demand rotation(For Customer-Managed Symmetric KMS Key (not AWS managed CMK)): no need to enable auto-rotation, no need to change existing rotation schedule, limited times of triggering on-demand rotations
+- KMS Manual Key Rotation
+(Customer-Managed Symmetric KMS Key & Imports):
+  - New Key has a different KMS Key ID
+  - Keep the previous key active so you can decrypt old data
+  - Better to use aliases in this case (to hide the change of key for the application)
+  - Good solution to rotate KMS Key that are not eligible for automatic rotation (like asymmetric KMS Key)
+- kms alias updating: when doing manual rotation, hidding changes of the key
+- Changing The KMS Key For An Encr ypted EBS Volume: to use a new cmk key, create a snapshot, then create and encrypt a new volume using a new cmk key
+- Sharing KMS Encrypted RDS DB Snapshots: You can share RDS DB snapshots encrypted with KMS CMK with other accounts, but must first share the KMS CMK with the target account using Key Policy
+- kms key deletion consideration
+  - Schedule CMK for deletion with a waiting period of 7 to 30 days(pending deletion): during which, the cmk key cannot be used for encryption or be rotated
+  - can cancel the key deletion during the waiting period
+  - Consider disabling your key instead of deleting it if you’re not sure!
+- KMS Key Deletion – CloudWatch Alarm: Use CloudTrail, CloudWatch Logs, CloudWatch Alarms and SNS to be notified when someone tries to use a CMK that’s ”Pending deletion” in a cryptographic operation (Encrypt, Decrypt, ...)
+- CloudHSM(Hardware Security Module)
+  - KMS => AWS manages the software for encryption
+  - CloudHSM => AWS provisions encryption hardware, tamper resistant,
+  - You manage your own encryption keys entirely (not AWS)
+  - Supports both symmetric and asymmetric encryption (SSL/TLS keys)
+  - no free tier
+  - Must use the CloudHSM Client Software
+  - Redshift supports CloudHSM for database encryption and key management
+  - Good option to use with SSE-C encryption
+- cloudHSM high availability
+  - cloudHSM clusters are spread across multi-az
+- cloudHSM integrated with aws service
+  - integrated with kms
+  - configure kms custom key store with cloudHSM
+- aws artifact( not a service): Portal that provides customers with on-demand access to AWS compliance documentation and AWS agreements
+  - artifact reports
+  - artifact agreements
+  - Can be used to support internal audit or compliance
+- AWS Certificate Manager (ACM)
+  - manage TLS certificates, providing in-flight encryption for websites(https)
+  - auto-renew tls certificates
+  - support both public(free) and private tls certificates
+  - integrated with api gateway, cloudfront, elb
+- acm -- request public certificates
+  - list domain name
+  - select validation method: dns validation(leverage CNAME record), or email validation
+  - will take quite some time to verified
+  - public certificates will be auto-renewed(60 days before expiry)
+- acm -- import public certificates(no auto-renew)
+  - acm sends daily expiration events starting 45 days prior to expiration to eventbridge
+  - AWS Config has a managed rule named acm-certificate-expiration-check to check for expiring certificates (configurable number of days)
+- api gateway endpoints types
+  - edge-optimized(default, global): Requests are routed through the CloudFront Edge locations (improves latency), the api gateway still lives in only one region
+  - regional: could manually combine with cloudfront distro
+  - private
+- acm -- integration with api gateway
+  - assign a custom domain name to api gateway
+  - edge-optimized: TheTLS Certificate must be in the same region as CloudFront, in us-east-1
+  - regional: configure tls certificates and import it into api gateway (at the same region)
+- SSM parameter store
+  - Secure storage for configuration and secrets
+  - optionally encrypt using kms
+  - serverless, scalable
+  - version tracking
+  - managed with iam and path
+  - notification with cloudwatch events
+  - integration with cloudformation
+- ssm parameter store hierarchy
+- ssm parameter store standard vs advanced tiers
+  - parameters policies(advanced tier): apply ttl for parameters to force updating or deleting.
+  - Can assign multiple policies at a time
+- aws secret manager
+  - newer service, able to force rotation of secrets
+  - integrated with rds
+  - secrets encrypted with kms
+  - mostly meant for rds integration
+- aws secret manager multi-region secrets
+  - Secrets Manager keeps read replicas in sync with the primary Secret
+  - Ability to promote a read replica Secret to a standalone Secret
+  - Use cases: multi-region apps, disaster recovery strategies, multi-region DB...
+- SSM parameter store vs secret manager
+  - ssm parameter store: cheaper, no secret rotation(can use eventbridge to make cron job to rotate), kms is optional, integrated with cloudformation
+  - secret manager: auto-rotation
+  - kms encryption is mandatory
+  - can integration with cloudformation 
+- secret manager monitoring
+  - cloudtrail records api calls
+  - cloudtrail captures other related events that might have a security or compliance impact on your AWS account or might help you troubleshoot operational problems.
+  - CloudTrail records these events as non-API service events: RotationFailed event, RotationSucceeded event, RotationAbandoned event, CancelSecretVersionDelete event,...
+  - Combine with CloudWatch Logs and CloudWatch alarms for automations
+
 ## Identity
 ## VPC
 ## Route 53
