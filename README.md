@@ -1051,6 +1051,26 @@ por tfolio); Deploy a copy of the portfolio into the recipient account (must re-
   - supported resources: ec2, ec2 asg, ebs, lambda
 
 ## Disaster recovery
+
+- aws datasync
+  - move large amount of data from/to on-prem to aws (needs agent), or aws-aws (no need agent)
+  - can synchronoze to s3, efs, fsx
+  - can be scheduled daily/weekly/monthly
+  - File permissions and metadata are preserved (NFS POSIX, SMB...)
+  - One agent task can use 10 Gbps, can setup a bandwidth limit
+- aws backup overview:
+  - support PITR for supported services
+  - on-demand and scheduled
+  - tag-based backup policies
+  - You create backup policies known as Backup Plans
+    - backup frequency
+    - backup window
+    - retention period
+    - transition to cold storage
+  - backup to s3 bucket
+- aws backup vault lock: Enforce a WORM (Write Once Read Many) state for all the backups that you store in your AWS Backup Vault
+  - Even the root user cannot delete backups when enabled
+
 ## Security and compliance
 ## Identity
 ## VPC
