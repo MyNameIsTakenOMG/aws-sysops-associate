@@ -1250,6 +1250,82 @@ por tfolio); Deploy a copy of the portfolio into the recipient account (must re-
   - Combine with CloudWatch Logs and CloudWatch alarms for automations
 
 ## Identity
+
+- iam security tools
+  - iam credentials reports(account level)
+  - iam access advisor(user level)
+- iam access analyzer
+  - Find out which resources are shared externally
+  - Define Zone of Trust = AWS Account or
+AWS Organization
+  - Access outside zone of trusts => findings
+- Identity Federation
+  - lets users outside of AWS to assume temporary role for accessing AWS resources.
+  - Federation assumes a form of 3rd party authentication
+  - Using federation, you don’t need to create IAM users (user management is outside of AWS)
+- SAML Federation For Enterprises
+  - To integrate Active Directory / ADFS with AWS (or any SAML 2.0)
+  - Provides access to AWS Console or CLI (through temporary creds)
+  - No need to create an IAM user for each of your employees
+- Custom Identity Broker Application For Enterprises
+  - Use only if identity provider is not compatible with SAML 2.0
+  - The identity broker must determine the appropriate IAM policy
+- AWS Cognito - Federated Identity Pools For Public Applications
+  - goal: Provide direct access to AWS Resources from
+the Client Side
+- AWS STS – Security Token Service
+  - Allows to grant limited and temporary access to AWS resources.
+  - Token is valid for up to one hour (must be refreshed)
+  - AssumeRole: Within your own account: for enhanced security. Cross Account Access: assume role in target account to perform actions there
+  - AssumeRoleWithSAML: return credentials for users logged with SAML
+  - AssumeRoleWithWebIdentity: return creds for users logged with an IdP (Facebook Login, Google Login, OIDC compatible...). AWS recommends against using this, and using **Cognito** instead
+  - GetSessionToken: for MFA, from a user or AWS account root user
+- Using STS to Assume a Role
+  - Define an IAM Role within your account or cross-account
+  - Define which principals can access this IAM Role
+  - Use AWS STS (Security Token Service) to retrieve credentials and impersonate the IAM Role you have access to (AssumeRole API)
+  - Temporary credentials can be valid between 15 minutes to 1 hour
+- Cross-Account Access with STS
+- Cognito User Pools (CUP) – User Features: Create a serverless database of user for your web & mobile apps
+  - simple login
+  - password reset
+  - email & phone number verification
+  - multi-factor authentication
+  - federated identities
+  - Login sends back a JSON Web Token (JWT)
+- Cognito User Pools (CUP) - Integrations
+  - CUP integrates with API Gateway and Application Load Balancer
+- Cognito Identity Pools (Federated Identities)
+  - Get identities for “users” so they obtain temporary AWS credentials
+  - Your identity pool (e.g identity source) can include:
+    - Public Providers
+    - aws cognito user pool
+    - OIDC & SAML
+    - Developer Authenticated Identities (custom login server)
+    - or guest(unauthenticated)
+  - Users can then access AWS services directly or through API Gateway 
+- Cognito Identity Pools – IAM Roles
+  - Default IAM roles for authenticated and guest users
+  - You can partition your users’ access using policy variables
+  - Define rules to choose the role for each user based on the user’s ID
+  - IAM credentials are obtained by Cognito Identity Pools through STS
+  - The roles must have a “trust” policy of Cognito Identity Pools
+- Cognito User Pools vs Identity Pools
+  - Cognito User Pools (for authentication = identity verification)
+  - Cognito Identity Pools (for authorization = access control)
+  - CUP + CIP = authentication + authorization
+  
+
+
+
+
+
+
+
+
+
+
+
 ## VPC
 ## Route 53
 ## Other services
