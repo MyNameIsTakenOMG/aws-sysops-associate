@@ -1732,7 +1732,7 @@ create a Health Check that checks the alarm itself
   - Each Endpoint supports 10,000 queries per second per IP address
 - Route 53 – Resolver Inbound Endpoints
 - Route 53 – Resolver Outbound Endpoints
-- Route 53 – Resolver Rules
+- Route 53 – Resolver Rules (outbound endpoint: forward dns queries to the dns server on-prem from your vpc)
   - Conditional Forwarding Rules (Forwarding Rules): Forward DNS queries for a specified domain and all its subdomains to target ip addresses
   - System Rules: Selectively overriding the behavior defined in Forwarding Rules (e.g., don’t forward DNS queries for a subdomain acme.example.com)
   - Auto-defined System Rules: Defines how DNS queries for selected domains are resolved (e.g., AWS internal domain names, Privated Hosted Zones)
@@ -1741,10 +1741,16 @@ create a Health Check that checks the alarm itself
     - Manage them centrally in one account
     - Send DNS queries from multiple VPC to the target IP defined in the rule
 
-
-
-
 ## Other services
 
-- x-ray
+- x-ray: Visual analysis of our applications. Especially great for distributed systems
+  - Understand dependencies in a microservice architecture
+  - Review request behavior
+  - Pinpoint service issues, errors, exceptions
+  - Troubleshooting performance (bottlenecks, Where I am throttled?)
+  - Identify users that are impacted
+  - Are we meeting time SLA?
 - amplify
+  - A set of tools and services that helps you develop and deploy scalable full stack web and mobile applications
+  - Authentication, Storage, API(REST,GraphQL), CI/CD, PubSub, Analytics, AI/MLPredictions, Monitoring, ...
+  - Connect your source code from GitHub, AWS CodeCommit, Bitbucket, GitLab, or upload directly
