@@ -1574,4 +1574,177 @@ connect to the Internet
     - Send logs of rule matches to Amazon S3, CloudWatch Logs, Kinesis Data Firehose
 
 ## Route 53
+
+- DNS: Domain Name System which translates the human friendly hostnames into the machine IP addresses
+- DNS Terminologies:
+  - Domain Registrar
+  - DNS Records
+  - Zone File
+  - Name Server
+  - Top Level Domain(TLD): .com, .us, .in,...
+  - Second Level Domain (SLD): amazon.com, google.com, ...
+- Amazon Route 53
+  - A highly available, scalable, fully
+managed and Authoritative DNS.
+  - Also a domain registar
+  - can do health check
+- route 53 records (How you want to route traffic for a domain)
+  - each record contains:
+    - domain/subdomain name
+    - record type:
+      - A: maps a hostname to IPv4
+      - AAAA: maps a hostname to IPv6
+      - CNAME: maps a hostname to another hostname
+        - The target is a domain name which must have an A or AAAA record
+        - Can’t create a CNAME record for the top node of a DNS namespace (Zone Apex)
+      - NS: Name Servers for the Hosted Zone
+    - value: ip address
+    - routing policy
+    - ttl:
+      - high ttl (such as 24hr): Less traffic on Route 53. Possibly outdated records
+      - low ttl (such as 60 sec): More traffic on Route 53 ($$). easy to change records. Records are outdated for less time
+      - Except for Alias records, TTL is mandatory for each DNS record
+  - some advanced records: CAA, DS, MX,...
+- route 53 hosted zones($0.50 per zone)
+  - A container for records that define how to route traffic to a domain and its subdomains
+  - Public Hosted Zones – contains records that specify how to route traffic on the Internet (public domain names)
+  - Private Hosted Zones – contain records that specify how you route traffic within one or more VPCs (private domain names)
+- CNAME vs Alias
+  - AWS Resources (Load Balancer, CloudFront...) expose an AWS hostname
+  - CNAME: Points a hostname to any other hostname. ONLY FOR NON ROOT DOMAIN
+  - Alias: Points a hostname to an AWS Resource.
+    - free of charge
+    - native health check
+    - Works for ROOT DOMAIN and NON ROOT DOMAIN
+- route53 alias records
+  - Maps a hostname to an AWS resource
+  - An extension to DNS functionality
+  - Automatically recognizes changes in the resource’s IP addresses
+  - Unlike CNAME, it can be used for the top node of a DNS namespace (Zone Apex), e.g.: example.com
+  - Alias Record is always of type A/AAAA for AWS resources (IPv4 / IPv6)
+  - You can’t set the TTL
+- route 53 alias records targets
+  - elb
+  - cloudfront distribution
+  - api gateway
+  - s3 website
+  - elastic beanstalk environments
+  - vpc interface endpoint
+  - global accelerator
+  - route 53 record in the same hosted zone
+  - You cannot set an ALIAS record for an EC2 DNS name
+- route 53 routing policies
+  - Define how Route 53 responds to DNS queries
+  - Don’t get confused by the word “Routing”: DNS does not route any traffic, it only responds to the DNS queries
+  - routing policies: simple, weighted, failover, latency based, geolocation, multi-value answer, geoproximity(using Route 53 Traffic Flow feature)
+- routing policy -- simple
+  - Typically, route traffic to a single resource
+  - Can specify multiple values in the same record
+  - If multiple values are returned, a random one is chosen by the client
+  - When Alias enabled, specify only one AWS resource
+  - Can’t be associated with Health Checks
+- routing policy -- weighted
+  - Control what percentage of the requests that go to each specific resource
+  - Assign each record a relative weight(weights do need to sum up to 100)
+  - DNS records must have the same name and type
+  - Can be associated with Health Checks
+  - Use cases: load balancing between regions, testing new application versions...
+  - Assign a weight of 0 to a record to stop sending traffic to a resource
+  - If all records have weight of 0, then all records will be returned equally
+- routing policy -- latency-based
+  - Redirect to the resource that has the least latency close to us
+  - Super helpful when latency for users is a priority
+  - Latency is based on traffic between users and AWS Regions
+  - Can be associated with Health Checks (has a failover capability)
+- route 53 -- health check
+  - HTTP Health Checks are only for public
+resources
+  - Health Checks are integrated with cloudwatch metrics:
+    - monitor an endpoint: About 15 global health checkers will check the endpoint health
+      - health/unhealth threshold
+      - interval
+      - supported protocol
+      - health check pass only when the response is 2xx or 3xx
+      - health check can be configured to check first 5120 bytes of the response
+    - monitor other other health checks: Calculated Health Checks. can use OR, AND, or NOT. Up to 256 child health checks
+    - monitor cloudwatch metrics(full control)
+  - Health Check => Automated DNS Failover
+- Health Checks – Private Hosted Zones
+  - Route 53 health checkers are outside the VPC
+  - They can’t access private endpoints (private VPC or on-premises resource)
+  - You can create a CloudWatch Metric and associate a CloudWatch Alarm, then
+create a Health Check that checks the alarm itself
+- routing policy -- failover(active-passive)
+- routing policy -- geolocation
+  - Different from Latency-based!
+  - This routing is based on user location
+  - Specify location by Continent, Country or by US State (if there’s overlapping, most precise location selected)
+  - Should create a “Default” record (in case there’s no match on location)
+  - Use cases: website localization, restrict content distribution, load balancing, ...
+  - Can be associated with Health Checks
+- Routing Policies – Geoproximity
+  - Route traffic to your resources based on the geographic location of users and resources
+  - Ability to `shift more traffic to resources` based on the defined `bias`
+  - To change the size of the geographic region, specify bias values:
+    - To expand (1 to 99) – more traffic to the resource
+    - To shrink (-1 to -99) – less traffic to the resource
+  - Resources can be: aws resources or non-aws resources
+  - you must use route 53 **traffic flow** to use this feature 
+- route 53 -- traffic flow
+  - Simplify the process of creating and maintaining records in large and complex configurations
+  - **Visual editor** to manage complex routing decision trees
+  - Configurations can be saved as Traffic Flow Policy:
+    - Can be applied to different Route 53 Hosted Zones (different domain names)
+    - Supports versioning
+- routing policy -- ip-based routing
+  - Routing is based on clients’ IP addresses
+  - You provide a list of CIDRs for your clients and the corresponding endpoints/locations (user-IP-to-endpoint mappings)
+  - Use cases: Optimize performance, reduce network costs...
+  - Example: route end users from a particular ISP to a specific endpoint
+- Routing Policies – Multi-Value
+  - Use when routing traffic to multiple resources
+  - Route 53 return multiple values/resources
+  - Can be associated with Health Checks (return only values for healthy resources)
+  - Up to 8 healthy records are returned for each Multi-Value query
+  - Multi-Value is not a substitute for having an ELB
+- Domain Registar vs. DNS Service
+  - can buy one domain name from a domain registar, and manage it using route 53
+  - create a hosted zone in route 53
+  - Update NS Records on 3rd party website to use Route 53 Name Servers
+- S3 Website with Route 53
+  - Create an S3 bucket with the same name as the target record
+  - Enable S3 website on the bucket (and enable S3 bucket public settings)
+  - Create a Route 53 Alias record to the S3 website endpoint or type A – IPv4 address
+  - This only works for HTTP traffic (for HTTPS, use CloudFront)
+- Route 53 – Hybrid DNS
+  - By default, Route 53 Resolver automatically answers DNS queries for: Local domain names for EC2 instances, records in private hosted zones or public name servers
+  - Hybrid DNS – resolving DNS queries between VPC (Route 53 Resolver) and your networks (other DNS Resolvers)
+  - Networks can be: vpc/peered vpc; on-prem network(connected through Direct Connect or AWS VPN)
+- Route 53 – Resolver Endpoints
+  - Inbound Endpoint
+    - DNS Resolvers on your network can forward DNS queries to Route 53 Resolver
+    - Allows your DNS Resolvers to resolve domain names for AWS resources (e.g., EC2 instances) and records in Route 53 Private Hosted Zones
+  - Outbound Endpoint
+    - Route 53 Resolver conditionally forwards DNS queries to your DNS Resolvers
+    - Use Resolver Rules to forward DNS queries to your DNS Resolvers
+  - Associated with one or more VPCs in the same AWS Region
+  - Create in two AZs for high availability
+  - Each Endpoint supports 10,000 queries per second per IP address
+- Route 53 – Resolver Inbound Endpoints
+- Route 53 – Resolver Outbound Endpoints
+- Route 53 – Resolver Rules
+  - Conditional Forwarding Rules (Forwarding Rules): Forward DNS queries for a specified domain and all its subdomains to target ip addresses
+  - System Rules: Selectively overriding the behavior defined in Forwarding Rules (e.g., don’t forward DNS queries for a subdomain acme.example.com)
+  - Auto-defined System Rules: Defines how DNS queries for selected domains are resolved (e.g., AWS internal domain names, Privated Hosted Zones)
+  - If multiple rules matched, Route 53 Resolver chooses the most specific match
+  - Resolver Rules can be shared across accounts using AWS RAM:
+    - Manage them centrally in one account
+    - Send DNS queries from multiple VPC to the target IP defined in the rule
+
+
+
+
 ## Other services
+
+- x-ray
+- amplify
