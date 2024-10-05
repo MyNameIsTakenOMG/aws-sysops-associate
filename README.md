@@ -24,6 +24,7 @@
 - [VPC](#vpc)
 - [Route 53](#route-53)
 - [Other services](#other-services)
+- [Tests reviews](#tests-reviews)
 
 
 ## EC2 for SysOps
@@ -1754,3 +1755,40 @@ create a Health Check that checks the alarm itself
   - A set of tools and services that helps you develop and deploy scalable full stack web and mobile applications
   - Authentication, Storage, API(REST,GraphQL), CI/CD, PubSub, Analytics, AI/MLPredictions, Monitoring, ...
   - Connect your source code from GitHub, AWS CodeCommit, Bitbucket, GitLab, or upload directly
+
+
+## Tests reviews
+
+### table of contents
+
+- [Practice Exam Review](#practice-exam-review)
+
+
+
+### Practice Exam Review
+
+- An Amazon EC2 Dedicated Host is a physical server with EC2 instance capacity fully dedicated to your use. Dedicated Hosts allow you to use your existing per-socket, per-core, or per-VM software licenses
+- You can allow only SSL connections to your RDS for PostgreSQL database instance by enabling the rds.force_ssl parameter ("0" by default) through the parameter groups page on the RDS Console or through the CLI.
+- By default, Amazon Simple Storage Service (Amazon S3) doesn't collect server access logs. When you enable logging, Amazon S3 delivers access logs for a source bucket to a target bucket that you choose. The target bucket must be in the same AWS Region as the source bucket and must not have a default retention period configuration. And then use Athena to analyze the logs
+- All objects by default are private. Only the object owner has permission to access these objects. However, the object owner can optionally share objects with others by creating a presigned URL, using their own security credentials, to grant time-limited permission to download the objects.
+- You can set up the CloudWatch agent to use multiple configuration files. Any configuration files that will be used together on the same server must have different file names. If you use append-config with a configuration file with the same file name as a configuration file that the agent is already using, the append command overwrites the information from the first configuration file instead of appending to it.
+- A stack policy applies only during stack updates, it doesn't provide access controls. The developer needs to provide access through IAM policies. It doesn't provide access controls like an AWS Identity and Access Management (IAM) policy. Use a stack policy only as a fail-safe mechanism to prevent accidental updates to specific stack resources. To control access to AWS resources or actions, use IAM.
+- s3 bucket versions: Different versions of a single object can have different retention modes and periods. When you apply a retention period to an object version explicitly(or through a bucket default setting which no need for specifying `retain until date`), you specify a Retain Until Date for the object version
+- CloudFormation StackSets allow you to roll out CloudFormation stacks over multiple AWS accounts and in multiple Regions with just a couple of clicks. You can now centrally orchestrate any AWS CloudFormation enabled service across multiple AWS accounts and regions.
+- To control how AWS CloudFormation handles the EBS volume when the stack is deleted, set a deletion policy for your volume.
+- Use an Elastic Beanstalk blue (environment A)/green (environment B) deployment to decouple the RDS DB instance from environment A. Create a new Elastic Beanstalk environment (environment B) with the necessary information to connect to the decoupled RDS DB instance
+- AWS Storage Gateway uses SSL/TLS (Secure Socket Layers/Transport Layer Security) to encrypt data that is transferred between your gateway appliance and AWS storage. By default, Storage Gateway uses Amazon S3-Managed Encryption Keys to server-side encrypt all data it stores in Amazon S3
+- Enable Enhanced Monitoring for your RDS DB instance. By default, Enhanced Monitoring metrics are stored for 30 days in the CloudWatch Logs, which are different from typical CloudWatch metrics. Enhanced Monitoring for RDS provides the following OS metrics: 1.Free Memory 2.Active Memory 3.Swap Free 4.Processes Running 5.File System Used
+- The error indicates the IAM role is not correctly configured. After you've created a flow log, you cannot change its configuration. Instead, you need to delete the flow log and create a new one with the required configuration
+- if a cloudformation stack(assuming resources are created in a private subnet) fails because it fails to receive a signal from ec2 instance, then it could be there is no network route (NAT gateway or internet gateway), or The cfn-signal script does not get executed before the timeout of the wait condition
+- You can bring an existing resource into AWS CloudFormation management using resource import
+- Your website is hosted on S3 and exposed through a CloudFront distribution and some users are said to experience a lot of 501 errors, then start to analyze the cloudfront access logs using Athena (cloudfront access logs can be configured to send to a s3 bucket). Do not start with s3 access logs, cuz it will not provide any details about IP or stuff, as requests are proxied through cloudfront. in addition, cloudfront will cache results, so s3 access logs will not contain much information
+- The Security Groups of instances on VPC1 should be configured to allow inbound traffic from resources in VPC2. By default, Network ACLs allow all inbound and outbound traffic. So, a default Network ACLs on VPC1 will not need any configuration changes
+- Amazon S3 default encryption provides a way to set the default encryption behavior for an S3 bucket. You can set default encryption on a bucket so that all new objects are encrypted when they are stored in the bucket.
+
+
+
+
+
+
+
