@@ -1784,7 +1784,70 @@ create a Health Check that checks the alarm itself
 - You can bring an existing resource into AWS CloudFormation management using resource import
 - Your website is hosted on S3 and exposed through a CloudFront distribution and some users are said to experience a lot of 501 errors, then start to analyze the cloudfront access logs using Athena (cloudfront access logs can be configured to send to a s3 bucket). Do not start with s3 access logs, cuz it will not provide any details about IP or stuff, as requests are proxied through cloudfront. in addition, cloudfront will cache results, so s3 access logs will not contain much information
 - The Security Groups of instances on VPC1 should be configured to allow inbound traffic from resources in VPC2. By default, Network ACLs allow all inbound and outbound traffic. So, a default Network ACLs on VPC1 will not need any configuration changes
-- Amazon S3 default encryption provides a way to set the default encryption behavior for an S3 bucket. You can set default encryption on a bucket so that all new objects are encrypted when they are stored in the bucket.
+- Amazon S3 default encryption provides a way to set the default encryption behavior for an S3 bucket. You can set default encryption on a bucket so that all new objects are encrypted when they are stored in the bucket. There is no change to the encryption of the objects that existed in the bucket before default encryption was enabled.
+- for rds, You can only enable encryption for an Amazon RDS DB instance when you create it, not after the DB instance is created.
+- for ebs, There is no direct way to encrypt an existing unencrypted volume or snapshot, you can encrypt them by creating either a volume or a snapshot.
+- for efs, You can enable encryption of data at rest when creating an Amazon EFS file system. Once the file system is created, you cannot modify the file system to be unencrypted or vice-versa.
+- The original Snowball devices were transitioned out of service and Snowball Edge Storage Optimized are now the primary devices used for data transfer. You may see the Snowball device on the exam, just remember that the original Snowball device had 80TB of storage space.
+- To support throughput near or exceeding 20K packets per second (PPS) on the VIF driver. Enhanced networking uses single root I/O virtualization (SR-IOV) to provide high-performance networking capabilities on supported instance types. SR-IOV is a method of device virtualization that provides higher I/O performance and lower CPU utilization when compared to traditional virtualized network interfaces. Enhanced networking provides higher bandwidth, higher packet per second (PPS) performance, and consistently lower inter-instance latencies. There is no additional charge for using enhanced networking.
+- to share CMK across accounts, The key policy for the CMK must give the external account (or users and roles in the external account) permission to use the CMK. IAM policies in the external account must delegate the key policy permissions to its users and roles
+- S3 Versioning is a means of keeping multiple variants of an object in the same bucket. You can use versioning to preserve, retrieve, and restore every version of every object stored in your Amazon S3 bucket. With versioning, you can easily recover from both unintended user actions and application failures.
+- When you want to move your application from one instance store-backed instance to an instance store-backed instance with a different instance type, you must migrate it by creating an image from your instance, and then launching a new instance from this image with the instance type that you need.
+- An instance store-backed EC2 instance can be resized
+- If an IAM user, with full access to IAM and Amazon S3, assigns a bucket policy to an Amazon S3 bucket and doesn't specify the AWS account root user as a principal, the root user is denied access to that bucket. However, as the root user, you can still access the bucket. To do that, modify the bucket policy to allow root user access from the Amazon S3 console or the AWS CLI.
+- If the load balancer is not responding to client requests:
+  - A security group or network ACL does not allow traffic
+  - Your internet-facing load balancer may be attached to a private subnet
+- Snowball Edge Storage Optimized is the optimal choice if you need to securely and quickly transfer dozens of terabytes to petabytes of data to AWS. (80TB). You can't directly copy data from Snowball Edge devices into AWS Glacier. The data stored on the Snowball Edge device can be copied into the S3 bucket and later transitioned into AWS Glacier via a lifecycle policy.
+- NetworkIn and NetworkOut - You can determine which instance is causing high network usage using the Amazon CloudWatch NetworkIn and NetworkOut metrics. You can aggregate the data points from these metrics to calculate the network usage for your instance.
+- After enabling S3 MFA-Delete, the actions that need MFA:
+  - Suspending versioning
+  - Permanently delete an object version
+- cloudformation: Set OnFailure=DO_NOTHING. You can use the OnFailure property of the CloudFormation CreateStack call for this use-case. The OnFailure property determines what action will be taken if stack creation fails. This must be one of DO_NOTHING, ROLLBACK, or DELETE. You can specify either OnFailure or DisableRollback, but not both.
+- ebs volume vs instance store:
+  - By default, data on a non-root EBS volume is preserved even if the instance is shutdown or terminated
+  - EBS snapshots only capture data that has been written to your Amazon EBS volume, which might exclude any data that has been locally cached by your application or operating system
+  - As a best practice, AWS recommends the use of separate Amazon EBS volumes for the operating system and your data. This ensures that the volume with your data persists even after instance termination or any issues to the operating system.
+- A Golden AMI is an AMI that you standardize through configuration, consistent security patching, and hardening. It also contains agents you approve for logging, security, performance monitoring, etc.
+- elastic beanstalk: Create a new beanstalk environment for each application and apply blue/green deployment patterns. Swap CNAMEs of the two environments
+- ec2 termination protection:
+  - You can't enable **termination protection** for Spot Instances (the `DisableApiTermination` attribution)
+  - To prevent instances that are part of an Auto Scaling group from terminating on scale in, use **instance protection** instead of Amazon EC2 termination protection
+- If your AMI contains a CloudWatch agent, it’s automatically installed on EC2 instances when you create an EC2 Auto Scaling group. With the stock Amazon Linux AMI, you need to install it (AWS recommends to install via yum).
+- Add a common tag to each bucket. Activate the tag as a cost allocation tag. Use the AWS Cost Explorer to create a cost report for the tag. Start by adding a common tag to each bucket. Activate the tag as a cost allocation tag. Use the AWS Cost Explorer to create a cost report for the tag. After you create the cost report, you can use it to review the cost of each bucket that has the cost allocation tag that you created.
+- s3 cost report: You can set up a daily or hourly AWS Cost and Usage report to get more Amazon S3 billing details. However, these reports won't show you who made requests to your buckets. To get more information on certain Amazon S3 billing items, you must enable logging ahead of time. Then, you'll have logs that contain Amazon S3 request details.
+- Check that the device name you specified when you attempted to attach the EBS volume isn't already in use. Attempt to attach the volume to the instance, again, but use a different device name
+- Amazon S3 default encryption provides a way to set the default encryption behavior for an S3 bucket. You can set default encryption on a bucket so that all new objects are encrypted when they are stored in the bucket. The objects are encrypted using server-side encryption with either Amazon S3-managed keys (SSE-S3) or customer master keys (CMKs) stored in AWS Key Management Service (AWS KMS).
+- It isn't possible to restore or recover a deleted or deregistered AMI. However, you can create a new, identical AMI using one of the following:
+  - Amazon Elastic Block Store (Amazon EBS) snapshots that were created as backups
+  - Amazon Elastic Compute Cloud (Amazon EC2) instances that were launched from the deleted AMI
+- Amazon RDS Read Replicas provide enhanced performance and durability for RDS database (DB) instances. They make it easy to elastically scale out beyond the capacity constraints of a single DB instance for read-heavy database workloads.
+- StatusCheckFailed: The AWS/EC2 namespace includes a few status check metrics. By default, status check metrics are available at a 1-minute frequency at no charge. Reports whether the instance has passed both the instance status check and the system status check in the last minute. This metric can be either 0 (passed) or 1 (failed).
+- Create the AMI by disabling the No reboot option - On the Create image page, No reboot flag is present. The default functionality is, Amazon EC2 shuts down the instance, takes snapshots of any attached volumes, creates and registers the AMI, and then reboots the instance. When No reboot option is selected, the instance is not shut down while creating the AMI. This option is not selected by default.
+- Create the AMI with No reboot option enabled - If the No reboot flag is selected, the instance is not shutdown while creating an AMI. This implies, the Operating System buffers are not flushed before creating an AMI, so data integrity could be an issue with AMIs created in this way. Such AMIs are crash-consistent but not application-consistent.
+- Configure CloudFront to mandate viewers to use HTTPS to request objects from S3. CloudFront and S3 will use HTTP to communicate with each other. If your Amazon S3 bucket is configured as a website endpoint, you can't configure CloudFront to use HTTPS to communicate with your origin because Amazon S3 doesn't support HTTPS connections in that configuration.
+- when your origin is an amazon s3 bucket that supports https communication, cloudfront always forwards requests to s3 by using the protocol that views used to submit requests.
+- To automate the replacement of unhealthy EC2 instances, you must change the health check type of your instance's Auto Scaling group from EC2 to ELB by using a configuration file of your Beanstalk environment
+- asg & elb health check:
+  - ec2 health check: Suitable for situations where you primarily need to ensure that your EC2 instances are operational and not facing hardware issues.
+  - elb health check: Recommended when you need to ensure that your application is truly available to handle traffic, as it provides a deeper level of health awareness.
+- You can use the wait condition handle to make AWS CloudFormation pause the creation of a stack and wait for a signal before it continues to create the stack. For example, you might want to download and configure applications on an Amazon EC2 instance before considering the creation of that Amazon EC2 instance complete.
+- the cfn-signal command is managed via CloudFormation, not via the user data.
+- With Amazon EBS, you can use any of the standard RAID configurations that you can use with a traditional bare metal server, as long as that particular RAID configuration is supported by the operating system for your instance. This is because all RAID is accomplished at the software level. For greater I/O performance than you can achieve with a single volume, RAID 0 can stripe multiple volumes together; for on-instance redundancy, RAID 1 can mirror two volumes together.
+- If you attempt to delete a stack with termination protection enabled, the deletion fails and the stack - including its status - remains unchanged
+- The Auto Scaling group in your Elastic Beanstalk environment uses two default Amazon CloudWatch alarms to trigger scaling operations. These alarms must be configured based on the parameters appropriate for your application. Default Auto Scaling triggers are configured to scale when the average outbound network traffic (NetworkOut) from each instance is higher than 6 MB or lower than 2 MB over a period of five minutes. For more efficient Amazon EC2 Auto Scaling, configure triggers that are appropriate for your application, instance type, and service requirements. You can scale based on several statistics including latency, disk I/O, CPU utilization, and request count.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
