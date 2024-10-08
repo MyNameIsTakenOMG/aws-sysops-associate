@@ -1836,9 +1836,29 @@ create a Health Check that checks the alarm itself
 - With Amazon EBS, you can use any of the standard RAID configurations that you can use with a traditional bare metal server, as long as that particular RAID configuration is supported by the operating system for your instance. This is because all RAID is accomplished at the software level. For greater I/O performance than you can achieve with a single volume, RAID 0 can stripe multiple volumes together; for on-instance redundancy, RAID 1 can mirror two volumes together.
 - If you attempt to delete a stack with termination protection enabled, the deletion fails and the stack - including its status - remains unchanged
 - The Auto Scaling group in your Elastic Beanstalk environment uses two default Amazon CloudWatch alarms to trigger scaling operations. These alarms must be configured based on the parameters appropriate for your application. Default Auto Scaling triggers are configured to scale when the average outbound network traffic (NetworkOut) from each instance is higher than 6 MB or lower than 2 MB over a period of five minutes. For more efficient Amazon EC2 Auto Scaling, configure triggers that are appropriate for your application, instance type, and service requirements. You can scale based on several statistics including latency, disk I/O, CPU utilization, and request count.
-
-
-
+- when enabling s3 bucket versioning, GET requests do not retrieve delete marker objects. The only way to list delete markers (and other versions of an object) is by using the versions subresource in a GET Bucket versions request. A simple GET does not retrieve delete marker objects.
+- Elastic Load Balancing is integrated with AWS CloudTrail, a service that provides a record of actions taken by a user, role, or an AWS service in Elastic Load Balancing. CloudTrail captures all API calls for Elastic Load Balancing as events. The calls captured include calls from the AWS Management Console and code calls to the Elastic Load Balancing API operations.
+- Create a backup plan in AWS Backup. Assign tags to resources based on the environment ( Production, Development, Testing). Create one backup policy for production environments and one backup policy for non-production environments. Schedule the backup plan based on the organization's backup policies
+- instance store-backed vs ebs-backed
+  - ebs-backed: If the root device for your instance is an EBS volume, you can change the size of the instance simply by changing its instance type, which is known as resizing it.
+  - instance store-backed: If the root device for your instance is an instance store volume, you must migrate your application to a new instance with the instance type that you need.
+  - if your instances are in an asg, you need to suspend the scaling processes for the group while you are resizing your instance, because asg will mark the stopped instances as unhealthy and replace them.
+  - for ebs-backed, after resizing, the instance id does not change, cuz aws just moved the instance to new hardware
+- AWS Storage Gateway is a hybrid cloud storage service that gives you on-premises access to virtually unlimited cloud storage. Storage Gateway provides a standard set of storage protocols such as iSCSI, SMB, and NFS, which allow you to use AWS storage without rewriting your existing applications. It provides low-latency performance by caching frequently accessed data on-premises, while storing data securely and durably in Amazon cloud storage services. Storage Gateway optimizes data transfer to AWS by sending only changed data and compressing data.
+- Create identity-based IAM policy in the Finance account that allows the user to make a request to the S3 buckets in the HR and Audit accounts. Also, create resource-based IAM policies in the HR, Audit accounts that will allow the requester from the Finance account to access the respective S3 buckets
+- You store your data in Amazon S3 Glacier as archives. Archives may be further grouped into vaults. S3 Glacier Vault Lock allows you to easily deploy and enforce compliance controls for individual S3 Glacier vaults with a vault lock policy.
+- Application Load balancers do not send data to X-Ray - Elastic Load Balancing application load balancers add a trace ID to incoming HTTP requests in a header named X-Amzn-Trace-Id. Load balancers do not send data to X-Ray and do not appear as a node on your service map.
+- Application Load balancers:
+  - Before you start using your Application Load Balancer, you must add one or more listeners
+  - You configure target groups of an ALB by attaching them to the listeners
+  - When you create a listener, you define actions for the default rule. Default rules can't have conditions. If the conditions for none of a listener's rules are met, then the action for the default rule is performed.
+- Store the files in S3 and distribute them using a CloudFront distribution instead. S3 is more cost-effective than EFS.
+- AWS can schedule events for your instances, such as a reboot, stop/start, or retirement. These events do not occur frequently. If one of your instances will be affected by a scheduled event, AWS sends an email to the email address that's associated with your AWS account before the scheduled event. The email provides details about the event, including the start and end date.
+  - Scheduled events are managed by AWS; you cannot schedule events for your instances. 
+- MFA Delete represents another layer of security wherein you can configure a bucket to enable MFA (multi-factor authentication) Delete, which requires additional authentication for either of the following operations:
+  - Change the versioning state of your bucket
+  - Permanently delete an object version
+  - only the bucket owner (root account) can enable MFA Delete only via the AWS CLI.
 
 
 
