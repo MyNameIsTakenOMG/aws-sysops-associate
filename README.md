@@ -1859,7 +1859,7 @@ create a Health Check that checks the alarm itself
   - Change the versioning state of your bucket
   - Permanently delete an object version
   - only the bucket owner (root account) can enable MFA Delete only via the AWS CLI.
-
+- ebs snapshots are only available through aws ec2 api not s3 api, even though it is stored in s3
 
 
 
