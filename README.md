@@ -1762,6 +1762,10 @@ create a Health Check that checks the alarm itself
 ### table of contents
 
 - [Practice Exam Review](#practice-exam-review)
+- [Practice Test1 Review](#practice-test1-review)
+- [Practice Test2 Review](#practice-test2-review)
+- [Practice Test3 Review](#practice-test3-review)
+- [Practice Test4 Review](#practice-test4-review)
 
 
 
@@ -1862,8 +1866,123 @@ create a Health Check that checks the alarm itself
 - ebs snapshots are only available through aws ec2 api not s3 api, even though it is stored in s3
 
 
+### Practice Test1 Review
+
+- for elastic beanstalk, to detach a database from one environment and attach it to another environment, make a snapshot of db in environment A, then go to db console(RDS) to enable `deletion protection` to safeguard db. lastly, create a new identical environment B which connects to the same db, and then perform blue/green deployment(or CNAME swap)
+- To automate the replacement of unhealthy EC2 instances, you must change the health check type of your instance's Auto Scaling group from EC2 to ELB by using a configuration file of your Beanstalk environment. By default, the health check configuration of your Auto Scaling group is set as an EC2 type that performs a status check of EC2 instances.
+- for ec2 health check (for an elastic beanstalk environment, the asg ec2 health check is the default setting)
+  - it only checks the ec2 instances health, not the applications, servers, or docker containers
+  - if your app crashes, the load balancer will remove it from the target, but asg won't replace it with a new one
+- CloudFormation StackSets allow you to roll out CloudFormation stacks over multiple AWS accounts and in multiple Regions with just a couple of clicks. When AWS launched StackSets, grouping accounts was primarily for billing purposes. Since the launch of AWS Organizations, you can centrally manage multiple AWS accounts across diverse business needs including billing, access control, compliance, security and resource sharing.
+- Snowball Edge Storage Optimized is the optimal choice if you need to securely and quickly transfer dozens of terabytes to petabytes of data to AWS.
+- Stack policies help protect critical stack resources from unintentional updates that could cause resources to be interrupted or even replaced. A stack policy is a JSON document that describes what update actions can be performed on designated resources.
+- AWS Systems Manager Patch Manager automates the process of patching managed instances with both security-related and other types of updates. You can use Patch Manager to apply patches for both operating systems and applications. Patch Manager provides options to scan your instances and report compliance on a schedule, install available patches on a schedule, and patch or scan instances on demand whenever you need to.
+- AWS system manage automation does not include patch management
+- VPC:
+  - Regardless of the type of subnet, the internal IPv4 address range of the subnet is always private
+  - When you create a VPC, you must specify a range of IPv4 addresses for the VPC in the form of a Classless Inter-Domain Routing (CIDR) block
+  - By default, all subnets can route between each other, whether they are private or public in a VPC, the main route table facilitates this communication
+  - subnets must reside in one AZ, cannot span across multi-az
+- ec2 metrics:
+  - CPUUtilization metric should be used to identify the processing power required
+  - CPUCreditUsage metric identifies the number of CPU credits spent by the instance for CPU utilization.
+  - ResourceCount metric defines the number of the specified resources running in your account. The resources are defined by the dimensions associated with the metric.
+- StatusCheckFailed - Reports whether the instance has passed both the instance status check and the system status check in the last minute. This metric can be either 0 (passed) or 1 (failed). By default, this metric is available at a 1-minute frequency at no charge.
+- Monitor Trusted Advisor service check results with Amazon CloudWatch Events - AWS Trusted Advisor checks for service usage that is more than 80% of the service limit. You can use Amazon CloudWatch Events to detect and react to changes in the status of Trusted Advisor checks. Then, based on the rules that you create, CloudWatch Events invokes one or more target actions when a status check changes to the value you specify in a rule. 
+- CloudWatch ServiceLens enhances the observability of your services and applications by enabling you to integrate traces, metrics, logs, and alarms into one place. So, ServiceLens can be used once we define the alarms in CloudWatch, not without it.
+- AWS inspector: lambda, ec2, ecr. network accessibility, image vulnerability, security
+- For Lambda functions configured as a target to EventBridge, you need to provide resource-based policy. IAM Roles will not work - IAM roles for rules are only used for events related to Kinesis Streams. For Lambda functions and Amazon SNS topics, you need to provide resource-based permissions.
+  - for lambda, sqs, sns, cloudwatch logs, eventbridge relis on resource-based policies
+  - for kinesis streams, eventbridge relis on iam roles.
+- To configure your Auto Scaling group to scale based on a schedule, you create a `scheduled action`. The scheduled action tells Amazon EC2 Auto Scaling to perform a scaling action at specified times. To create a scheduled scaling action, you specify the start time when the scaling action should take effect, and the new minimum, maximum, and desired sizes for the scaling action.
+- If your AMI contains a CloudWatch agent, it’s automatically installed on EC2 instances when you create an EC2 Auto Scaling group. With the stock Amazon Linux AMI, you need to install it (AWS recommends to install via yum).
+- Status checks are built into Amazon EC2, so they **cannot** be disabled or deleted. Status checks are performed every minute, returning a pass or a fail status.
+- when asg cannot launch an ec2 instance because of lack of permission to access the customer-managed CMK used to encrypt the **EBS volume**, which would an error: `Client.InternalError: Client error on launch`, then there are two possible solutions:
+  - Use a CMK in the same AWS account as the Auto Scaling group. Copy and re-encrypt the snapshot with another CMK that belongs to the same account as the Auto Scaling group. Allow the service-linked role to use the new CMK.
+  - Continue to use the CMK in a different AWS account from the Auto Scaling group. Determine which service-linked role to use for this Auto Scaling group. Allow the Auto Scaling group account access to the CMK. Define an IAM user or role in the Auto Scaling group account that can create a grant. Create a grant to the CMK with the service-linked role as the grantee principal. Update the Auto Scaling group to use the service-linked role.
+    - **Note**: if the cmk and asg are in the same aws account, then just need to update the key policy of the cmk to allow the service-linked role to the use the cmk, and then update the asg to use the service-linked role.
+- You can set up the CloudWatch agent to use multiple configuration files. For example, you can use a common configuration file that collects a set of metrics and logs that you always want to collect from all servers in your infrastructure. You can then use additional configuration files that collect metrics from certain applications or in certain situations. To set this up, first create the configuration files that you want to use. Any configuration files that will be used together on the same server **must have different file names**. You can store the configuration files on servers or in Parameter Store.
+  - `fetch-config`: start using cloudwatch agent and specify the first configuration file
+  - `append-config`: to append any extra configuration files (different names, or it will overwrites the first configuration file)
+- cloudformation:
+  - !GetAtt: returns the value of an attribute from a resource in the template.
+  - !Sub: substitutes variables in an input string with values that you specify.
+  - !Ref: returns the value of the specified parameter or resource
+  - !FindInMap: returns the value corresponding to keys in a two-level map
+- AWS Storage Gateway uses SSL/TLS (Secure Socket Layers/Transport Layer Security) to encrypt data that is transferred between your gateway appliance and AWS storage. By default, Storage Gateway uses Amazon S3-Managed Encryption Keys to server-side encrypt all data it stores in Amazon S3
+- If CloudFront requests an object from your origin, and the origin returns an HTTP 4xx or 5xx status code, there's a problem with communication between CloudFront and your origin. Your CloudFront distribution might send error responses with HTTP status code 400 Bad Request, and a message similar to the following: `The authorization header is malformed; the region <AWS Region> is wrong; expecting <AWS Region>`.
+  - which indicates that the cloudfront distribution could not find the origin, trying to update the cloudfront distribution to find the correct origin
+- If the root device for your instance is an EBS volume, you can change the size of the instance simply by changing its instance type, which is known as resizing it. If the root device for your instance is an instance store volume, you must migrate your application to a new instance with the instance type that you need.
+  - **Note**: when the ec2 instance is in the asg, remember to suspend the scaling processes while resizing the instance
+- Configure the "Retain Until Date" in the object lock settings to a date that is 5 years from the object creation date and create a lifecycle policy to delete the object 5 years after the object is created.
+  - **Note**: You can place a retention period on an object version either explicitly or through a bucket default setting. When you apply a retention period to an object version explicitly, you specify a `Retain Until Date` for the object version. Amazon S3 stores the Retain Until Date setting in the object version's metadata and protects the object version until the retention period expires.
+- You can use Amazon CloudWatch Synthetics to create canaries, configurable scripts that run on a schedule, to monitor your endpoints and APIs. Canaries follow the same routes and perform the same actions as a customer, which makes it possible for you to continually verify your customer experience even when you don't have any customer traffic on your applications.
+- AWS Directory Services is a managed service that automatically creates an AWS security group in your VPC with network rules for traffic in and out of AWS managed domain controllers. The default inbound rules allow traffic from any source (0.0.0.0/0) to ports required by Active Directory. These rules do not introduce security vulnerabilities, as traffic to the domain controllers is limited to traffic from your VPC, other peered VPCs, or networks connected using AWS Direct Connect, AWS Transit Gateway or Virtual Private Network.
+- Subnets inside a VPC can communicate with each other without the need for any further configuration. Hence, no additional configurations are needed.
+  - The first entry in the Main route table is the default entry for local routing in the VPC; this entry enables the instances (potentially belonging to different subnets) in the VPC to communicate with each other.
+- Install CloudWatch Agent on all the instances and attach an IAM role to the EC2 instances to be able to run the CloudWatch agent.
+  - You must attach the CloudWatchAgentServerRole IAM role to the EC2 instance to be able to run the CloudWatch agent on the instance. This role enables the CloudWatch agent to perform actions on the instance.
+  - also, in order to access aws cloudwatch to sending metrics data, we need to grant permissions for the ec2 instance
+- when using the same cloudformation template to create multiple stacks in different regions, some unintended behaviors may occur, especially if the template contains some custom named iam resources. Because the iam resources must be globally unique  within your account.
+- when creating an environment using elastic beanstalk, the default auto scaling triggers are configured based on two aws cloudwatch alarms, the `network-in`,`network-out`. or can configure triggers to react to statistics
+- when the rds read replicas are running into issues consistently:
+  - writing to tables on a read replica can break the replication
+  - If the value for `the max_allowed_packet` parameter for a read replica is less than the `max_allowed_packet` parameter for the source DB instance, replica errors occur. The `max_allowed_packet` parameter is a custom parameter that you can set in a DB parameter group. The `max_allowed_packet` parameter is used to specify the maximum size of data manipulation language (DML) that can be run on the database. If the `max_allowed_packet` value for the source DB instance is larger than the `max_allowed_packet` value for the read replica, the replication process can throw an error and stop replication.
+- Because of security constraints that mandate such secrets never be shared between multiple parties, AWS MFA cannot support the use of your existing Gemalto device.
+- Enhanced networking uses single root I/O virtualization (SR-IOV) to provide high-performance networking capabilities on supported instance types.
+- if an aurora cluster is created in a single az, then if the az is down, then the only way to bring a new primary instance online is to provision a new db instance in another az
+- A Systems Manager Automation document defines the Automation workflow like restarting ec2 instances, creating AMIs (the actions that Systems Manager performs on your managed instances and AWS resources).
+  - Use the `AWSSupport-ExecuteEC2Rescue` document to recover impaired instances. 
+- Capacity Reservations:
+  - no billing discounts, but you can combine with `saving plans` or `regional reserved instances` to receive a discount
+  - enable you to reserve capacity for your Amazon EC2 instances in a specific Availability Zone for any duration
+- An interface VPC endpoint (interface endpoint) enables you to connect to services powered by AWS PrivateLink, a technology that enables you to privately access Amazon EC2 and Systems Manager APIs by using private IP addresses.
+- You can only share AMIs that have unencrypted volumes and volumes that are encrypted with a customer-managed CMK
+- You do not need to share the Amazon EBS snapshots that an AMI references in order to share the AMI
+- Sticky sessions are a mechanism to route requests to the same target in a target group. This is useful for servers that maintain state information in order to provide a continuous experience to clients. To use sticky sessions, the clients must support cookies.
+- Change sets allow you to preview how proposed changes to a stack might impact your existing resources, for example, whether your changes will delete or replace any critical resources, AWS CloudFormation makes the changes to your stack only when you decide to execute the change set, allowing you to decide whether to proceed with your proposed changes or explore other changes by creating another change set.
+- if an iam user has a s3 bucket with a bucket policy which does not include the root user, then the root user will not be able to access the bucket, but the root user still can manage the bucket policy to grant itself permission to access the bucket
+- when attaching an ebs volume, check if the device name is being used or not, otherwise try another name. when the ebs volume is stuck with attaching status, when try to force detach, and then attach with a new name
+- To track requests for access to your bucket, you can enable server access logging. Each access log record provides details about a single access request, such as the requester, bucket name, request time, request action, response status, and an error code, if relevant.
+  - **note**: we can also use cloudtrail to identify the requests made to s3, but s3 access logging is free service
+- Create a Role in production account, that defines the Development account as a trusted entity and specify a permissions policy that allows trusted users to update the bucket. Then, modify the IAM group policy in development account, so that testers are denied access to the newly created role. Developers can use the newly created role to access the live S3 buckets in production environment
+- An internet gateway is a horizontally scaled, redundant, and highly available VPC component that allows communication between your VPC and the internet. An internet gateway serves two purposes: to provide a target in your VPC route tables for internet-routable traffic, and to perform network address translation (NAT) for instances that have been assigned public IPv4 addresses.
+- Cloudfront & s3:
+  - **Note**: if you use an Amazon S3 bucket configured as a website endpoint, you can’t use the origin access identity feature.
+  - If you use an Amazon S3 bucket configured as a website endpoint, you must set it up with CloudFront as a custom origin. You can’t use the origin access identity feature. However, you can restrict access to content on a custom origin by setting up custom headers and configuring your origin to require them:
+    - Origin Custom Headers: Configure CloudFront to forward custom headers to your origin.
+    - Viewer Protocol Policy: Configure your distribution to require viewers to use HTTPS to access CloudFront.
+    - Origin Protocol Policy: Configure your distribution to require CloudFront to use the same protocol as viewers to forward requests to the origin.
+- After you increase the size of an EBS volume, you must use the file-system specific commands to extend the file system to the larger size. You can resize the file system as soon as the volume enters the optimizing state.
+- on ec2 instances, when collecting custom metrics using cloudwatch agent, you can use `StatsD` and `collectd` protocols
+  - `StatsD`: supported on both Linux servers and servers running Windows Server.
+  - `collectd`: supported only on Linux servers. 
+- Alarms continue to evaluate metrics against your chosen threshold, even after they have already triggered. This allows you to view its current up-to-date state at any time. You may notice that one of your alarms stays in the ALARM state for a long time. If your metric value is still in breach of your threshold, the alarm will remain in the ALARM state until it no longer breaches the threshold. This is normal behavior. If you want your alarm to treat this new level as OK, you can adjust the alarm threshold accordingly.
+- If you need to remove a file from CloudFront edge caches before it expires, you can do one of the following:
+  - Invalidate the file from edge caches.
+  - Use file versioning to serve a different version of the file that has a different name.
+- You can use the CloudFront console to create and run an invalidation, display a list of the invalidations that you submitted previously, and display detailed information about an individual invalidation. You can also copy an existing invalidation, edit the list of file paths, and run the edited invalidation. You can't remove invalidations from the list.
+- When you submit an invalidation request to CloudFront, CloudFront forwards the request to all edge locations within a few seconds, and each edge location starts processing the invalidation immediately. As a result, you can’t cancel an invalidation after you submit it.
+- If you created an AWS resource outside of AWS CloudFormation management, you can bring this existing resource into AWS CloudFormation management using `resource import`.
+- Create identity-based IAM policy in the Finance account that allows the user to make a request to the S3 buckets in the HR and Audit accounts. Also, create resource-based IAM policies in the HR, Audit accounts that will allow the requester from the Finance account to access the respective S3 buckets
+- Traffic between EC2 instances in different AWS Regions stays within the AWS network, if there is an Inter-Region VPC Peering connection between the VPCs where the two instances reside
+- Traffic between two EC2 instances in the same AWS Region stays within the AWS network, even when it goes over public IP addresses
+- By default, you can terminate your instance using the Amazon EC2 console, command line interface, or API. But you can enable termination protection for the instance. The `DisableApiTermination` attribute controls whether the instance can be terminated using the console, CLI, or API.
+  - **note**: however, the `DisableApiTermination` attribute does not prevent you from terminating an instance by initiating shutdown from the instance (using an operating system command for system shutdown) when the `InstanceInitiatedShutdownBehavior` attribute is set(stop, terminate, hibernate).
+- In a Multi-AZ deployment, Amazon RDS automatically provisions and maintains a synchronous standby replica in a different Availability Zone.
+- To control whether an Auto Scaling group can terminate a particular instance when scaling in, use instance **scale-in protection**. You can enable the instance scale-in protection setting on an `Auto Scaling group` or an `individual Auto Scaling instance`.
+  - the **scale-in protection** does not protect instances from:
+    - manual termination. (to protect against manual termination, enable ec2 termination protection)
+    - health check replacement. (to protect against unhealthy termination, suspend the `ReplaceUnhealthy` process)
+    - spot instance interruptions
+- Create the AMI by disabling the `No reboot` option
+- use aws config to define rules and carry out the necessary `auto-remediation`(aws config rule feature) if needed
+- If there is at least one healthy target in a target group, the load balancer routes requests only to the healthy targets. If a target group contains only unhealthy targets, the load balancer routes requests to the unhealthy targets. Hence, it is advised to configure an Auto Scaling Group, if the instances are hosting a business-critical application.
 
 
+### Practice Test2
+### Practice Test3
+### Practice Test4
 
 
 
