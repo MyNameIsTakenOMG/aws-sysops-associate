@@ -1981,6 +1981,37 @@ create a Health Check that checks the alarm itself
 
 
 ### Practice Test2
+
+- S3 is more cost-effective than EFS. and deliver content out of cloudfront can be more cost-effective than delivering it from s3 bucket
+- To perform queries, you can connect to the `reader endpoint`, with Aurora automatically performing load-balancing among all the Aurora Replicas.
+- Amazon S3 default encryption provides a way to set the default encryption behavior for an S3 bucket. You can set default encryption on a bucket so that all new objects are encrypted when they are stored in the bucket. The objects are encrypted using server-side encryption with either Amazon S3-managed keys (SSE-S3) or customer master keys (CMKs) stored in AWS Key Management Service (AWS KMS).
+- `InsufficientInstanceCapacity` error implies that AWS does not have the capacity to serve your request.
+- `InstanceLimitExceeded` error implies that you have reached the limit on the number of instances that you can launch in a region
+- AWS Trusted Advisor is an online tool that provides you real-time guidance to help you provision your resources following AWS best practices. Whether establishing new workflows, developing applications, or as part of ongoing improvement, you can take advantage of the recommendations provided by Trusted Advisor regularly to help keep your solutions provisioned optimally.
+- AWS Organizations helps you to centrally manage billing; control access, compliance, and security; and share resources across your AWS accounts. Using AWS Organizations, you can automate account creation, create groups of accounts to reflect your business needs, and apply policies for these groups for governance.
+- The OnFailure property determines what action will be taken if stack creation fails. This must be one of DO_NOTHING, ROLLBACK, or DELETE. You can specify either OnFailure or DisableRollback, but not both.
+- after enabling s3 MFA-delete,
+  - suspending versioning needs MFA
+  - permanently delete an object version needs MFA
+- Federate the users with Cognito so they can assume a role to access S3
+  - user pool: a user directory
+  - identity pool: users can obtain tmeporary aws credentials to access aws services
+- File Gateway provides a seamless way to connect to the cloud in order to store application data files and backup images as durable objects in Amazon S3 cloud storage. File Gateway offers SMB or NFS-based access to data in Amazon S3 with local caching. It can be used for on-premises applications, and for Amazon EC2-based applications that need file protocol access to S3 object storage.
+- for Elastic load balancer, it publishes metrics to cloudwatch in 60-second intervals. and it has a metric `ActiveConnectionCount` metric to monitor the total number of concurrent tcp connections active from clients
+- With Systems Manager, you can group resources, like Amazon EC2 instances, Amazon S3 buckets, or Amazon RDS instances, by application, view operational data for monitoring and troubleshooting, and take action on your groups of resources. and then AWS Systems Manager patch manager helps you select and deploy operating system and software patches automatically across large groups of Amazon EC2 or on-premises instances.
+- Patch Manager, a capability of AWS Systems Manager, can be used to automate patch management and OS updates for all the instances at one go
+- `SpilloverCount` represents the total number of requests that were rejected because the `surge queue` is full. The `SurgeQueueLength` is the metric of `Classic load balancer`, which measures the total number of requests queued by your clb. and this metric could mean the backend services or systems could not take all incoming requests and process them. to solve this issue, we can configure asg to scale based on the `SurgeQueueLength`. these two metrics are the metrics of clb
+- You can allow only SSL connections to your RDS for PostgreSQL database instance by enabling the rds.force_ssl parameter ("0" by default) through the `parameter groups` page on the RDS Console or through the CLI.
+- ELB access logs is an optional feature of Elastic Load Balancing that is disabled by default. The access logs capture detailed information about requests sent to your load balancer. Each log contains information such as the time the request was received, the client's IP address, latencies, request paths, and server responses. You can use these access logs to analyze traffic patterns and troubleshoot issues.
+- You can use a network address translation (NAT) gateway or internet gateway to enable instances in a private subnet to connect to the internet or other AWS services, but prevent the internet from initiating a connection with those instances.
+- To control how AWS CloudFormation handles the EBS volume when the stack is deleted, set a deletion policy for your volume. You can choose to retain the volume, to delete the volume, or to create a snapshot of the volume.
+- you need to add a route with a target of 0.0.0.0/0 to the NAT Gateway to make sure the instances in the private subnet to access the internet.
+- Tape Gateway enables you to replace using physical tapes on-premises with virtual tapes in AWS without changing existing backup workflows. Tape Gateway supports all leading backup applications and caches virtual tapes on-premises for low-latency data access.
+- You should note that only the bucket owner (root account) can enable MFA Delete only via the AWS CLI. However, the bucket owner, the AWS account that created the bucket (root account), and all authorized IAM users can enable versioning.
+- GuardDuty is a threat detection service that monitors malicious activity and unauthorized behavior to protect your AWS account. GuardDuty analyzes billions of events across your AWS accounts from AWS CloudTrail (AWS user and API activity in your accounts), Amazon VPC Flow Logs (network traffic data), and DNS Logs (name query patterns). 
+
+
+
 ### Practice Test3
 ### Practice Test4
 
