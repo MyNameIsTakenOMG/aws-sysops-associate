@@ -2067,6 +2067,72 @@ create a Health Check that checks the alarm itself
 
 
 ### Practice Test3
+
+- for elastic beanstalk, in order to avoid application downtime and quickly rolling back, choose blue/green deployment(swap route 53 CNAME records). while for rolling deployment policy, the duration of deployment is longer, and the rollback process is via manual redeploy, not as quick as the blue/green deployment.
+- Dedicated Instances are Amazon EC2 instances that run in a virtual private cloud (VPC) on hardware that's dedicated to a single customer. Dedicated Instances that belong to different AWS accounts are physically isolated at a hardware level, even if those accounts are linked to a single-payer account. However, Dedicated Instances may share hardware with other instances from the same AWS account that are not Dedicated Instances.
+- Using high-resolution custom metric, your applications can publish metrics to CloudWatch with 1-second resolution. You can watch the metrics scroll across your screen seconds after they are published and you can set up high-resolution CloudWatch Alarms that evaluate as frequently as every 10 seconds compared to the standard 1-minute alarms
+- resource-based policies grant the specified principal permission to perform specific actions on that resource and define under what conditions this applies.
+- trust policy: define which principal entities (accounts, users, roles, and federated users) can assume the role. An IAM role is both an identity and a resource that supports resource-based policies. For this reason, you must attach both a trust policy and an identity-based policy to an IAM role. The IAM service supports only one type of resource-based policy called a role trust policy, which is attached to an IAM role.
+- permission boundary: using a managed policy to set the maximum permissions that an identity-based policy can grant to an IAM entity.
+- Access control list: service policies that allow you to control which principals in another account can access a resource. cannot be used within the same account
+- aws organization service control policies(SCP): JSON policies that specify the maximum permissions for an organization or organizational unit (OU).
+- The only dimension that Amazon SQS sends to CloudWatch is QueueName. This means that all available statistics are filtered by QueueName.
+- When you use server-side encryption with AWS KMS (SSE-KMS), you can specify a customer-managed CMK that you have already created. SSE-KMS provides you with an audit trail that shows when your CMK was used and by whom.
+- A stack policy applies only during stack updates, it doesn't provide access controls. The developer needs to provide access through IAM policies
+- EBS volume types configuration: The maximum ratio of provisioned IOPS to the requested volume size (in GiB) is 50:1. So, for a 100 GiB volume size, the max IOPS possible is 100*50 = 5000 IOPS.
+- As per the AWS best practices, it is better to enable Multi Factor Authentication (MFA) for privileged users via an MFA-enabled mobile device or hardware MFA token.
+- AWS recommends to turn on CloudTrail to log all IAM actions for monitoring and audit purposes.
+- when enabling versioning on a s3 bucket, Get requests do not retrieve delet marker objects. The only way to list delete markers (and other versions of an object) is by using the versions subresource in a GET Bucket versions request. A delete marker is set on the deleted object, but the actual object is not deleted
+- For MySQL-compatible DB clusters, you can enable the slow query log, general log, or audit logs to get a view of the database activity. To enable logs, first modify the cluster parameter groups for an Aurora serverless cluster. For MySQL-compatible DB clusters, you can enable the slow query log, general log, or audit logs.
+- Amazon S3 uses AWS KMS customer master keys (CMKs) to encrypt your Amazon S3 objects. AWS KMS encrypts only the object data. Any object metadata is not encrypted. If the request does not include the `x-amz-server-side-encryption` header, then the request is denied.
+- EBS Volume types:
+  - SSD: gp1/2, io1/2 can be used as  boot volumes
+  - HDD: st1, sc1 cannot be used as a boot volumes
+- You can't enable termination protection for Spot Instances
+- To prevent instances that are part of an Auto Scaling group from terminating on scale in, use instance protection
+- for ec2 instances in an ASG, use the following feature instead of ec2 `termination protection`:
+  - to prevent instance from being terminated when scale in, use `instance protection`
+  - to prevent unhealthy instance from being terminated, suspend `ReplaceUnhealthy` process
+  - to specify which ec2 should be terminated first, choose a `termination policy`
+- EBS volume:
+  - As a best practice, AWS recommends the use of separate Amazon EBS volumes for the operating system and your data. This ensures that the volume with your data persists even after instance termination or any issues to the operating system.
+  - EBS snapshots only capture data that has been written to your Amazon EBS volume, which might exclude any data that has been locally cached by your application or operating system
+  - By default, data on a non-root EBS volume is preserved even if the instance is shutdown or terminated
+- Create a dedicated or hosted connection. Establish a cross-network connection and then create a public virtual interface for your connection. Configure an end router for use with the public virtual interface
+- VPC endpoint connections can't extend outside of a VPC.
+- An Amazon EC2 Dedicated Host is a physical server with EC2 instance capacity fully dedicated to your use. Dedicated Hosts allow you to use your existing per-socket, per-core, or per-VM software licenses, including Windows Server, Microsoft SQL Server, SUSE, and Linux Enterprise Server.
+- Cloudformation intrinsic functions:
+  - !ImportValue: returns the value of an output exported by another stack.
+  - !Ref: Returns the value of the specified parameter or resource.
+  - !GetAtt: Returns the value of an attribute from a resource in the template.
+  - !Sub: Substitutes variables in an input string with values that you specify.
+- for AWS RDS: Multi-AZ follows synchronous replication and spans at least two Availability Zones within a single region. Read replicas follow asynchronous replication and can be within an Availability Zone, Cross-AZ, or Cross-Region
+- when configuring ALB:
+  - Before you start using your Application Load Balancer, you must add one or more listeners (one default rule and other additional rules)
+  - You configure target groups of an ALB by attaching them to the listeners
+  - we can reigster one target with multiple target groups
+  - targets can be in different az
+  - default rule does not have conditions
+- AWS Direct Connect by itself cannot provide an encrypted connection between a data center and AWS Cloud, but with aws vpc vpn, we can enable IPsec-encrypted private connection.
+- Create a cross-stack reference and use the Export output field to flag the value of VPC from the network stack. Then use Fn::ImportValue intrinsic function to import the value of VPC into the web application stack
+- AWS Storage Gateway is a hybrid cloud storage service that gives you on-premises access to virtually unlimited cloud storage. The service provides three different types of gateways – Tape Gateway, File Gateway, and Volume Gateway – that seamlessly connect on-premises applications to cloud storage, caching data locally for low-latency access.
+- cloudwatch vs cloudtrail vs config
+  - resource performance monitoring, events, and alerts; think CloudWatch.
+  - account-specific activity and audit; think CloudTrail.
+  - resource-specific history, audit, and compliance; think Config.
+- You can trial test the new version before opting it for production systems. To do so, create a DB snapshot of your existing DB instance, restore from the DB snapshot to create a new DB instance, and then initiate a version upgrade for the new DB instance. You can then experiment safely on the upgraded copy of your DB instance before deciding whether or not to upgrade your original DB instance.
+- ELB access log: contains information such as the time the request was received, the client's IP address, latencies, request paths, and server responses. You can use these access logs to analyze traffic patterns and troubleshoot issues. Access logging is an optional feature of Elastic Load Balancing that is disabled by default.
+- Run the `AWSSupport-TroubleshootS3PublicRead` automation document on AWS Systems Manager to help you diagnose issues with accessing objects from a public S3 bucket. This document analyzes some permissions settings that affect the bucket and objects, such as the bucket policy and object access control lists (ACLs), among others.
+- To securely serve this private content by using CloudFront, you can do the following:
+  - A signed URL includes additional information
+  - CloudFront signed cookies allow you to control who can access your content when you don't want to change your current URLs or when you want to provide access to multiple restricted files, for example, all of the files in the subscribers' area of a website.
+  - use cases: private media streaming; controlled download; temporary accessc
+- As the CMK was deleted a day ago, it must be in the 'pending deletion' status and hence you can just cancel the CMK deletion and recover the key
+- Network Load Balancer is best suited for use-cases involving low latency and high throughput workloads that involve scaling to millions of requests per second.
+- Key pairs consist of a public key and a private key. You use the private key to create a digital signature, and then AWS uses the corresponding public key to validate the signature. Key pairs are used only for Amazon EC2 and Amazon CloudFront. AWS does not provide key pairs for your account; you must create them. 
+
+
+
 ### Practice Test4
 
 
