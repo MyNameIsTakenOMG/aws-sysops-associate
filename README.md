@@ -2130,7 +2130,50 @@ create a Health Check that checks the alarm itself
 - As the CMK was deleted a day ago, it must be in the 'pending deletion' status and hence you can just cancel the CMK deletion and recover the key
 - Network Load Balancer is best suited for use-cases involving low latency and high throughput workloads that involve scaling to millions of requests per second.
 - Key pairs consist of a public key and a private key. You use the private key to create a digital signature, and then AWS uses the corresponding public key to validate the signature. Key pairs are used only for Amazon EC2 and Amazon CloudFront. AWS does not provide key pairs for your account; you must create them. 
-
+- If the load balancer is not responding to client requests, check for the following issues:
+  - Your internet-facing load balancer may be attached to a private subnet
+  - A security group or network ACL does not allow traffic
+- The Security Groups of instances on VPC1 should be configured to allow inbound traffic from resources in VPC2. By default, Network ACLs allow all inbound and outbound traffic. So, a default Network ACLs on VPC1 will not need any configuration changes
+- Add a common tag to each bucket. Activate the tag as a cost allocation tag. Use the AWS Cost Explorer to create a cost report for the tag
+- Create a CloudWatch alarm for CPU Utilization of the Amazon EC2 instance, with detailed monitoring enabled. Configure an action to restart the instance when the alarm is triggered
+- cloudfront key pairs -- IAM users can't create CloudFront key pairs. You must log in using root credentials to create key pairs. you use key pairs to create signed URLs for private content, such as when you want to distribute restricted content that someone paid for.
+- Enable Amazon CloudWatch metrics that include a metric for 5xx server errors. Retrying generally fixes this error from s3 bucket
+- Use Amazon S3 Inventory reports to list the objects that have failed replication in the S3 buckets. You can use it to audit and report on the replication and encryption status of your objects for business, compliance, and regulatory needs. the metadata list contains `replication status`
+- the s3 select cannot be used to list the objects that have failed replication in the s3 buckets. you can use a simple SQL expression to return only the data from the store you’re interested in
+- If you attempt to delete a stack with `termination protection` enabled, the deletion fails and the stack - including its status - remains unchanged.
+- Enable Enhanced Monitoring for your RDS DB instance. Amazon RDS provides metrics in real time for the operating system (OS) that your DB instance runs on. You can view the metrics for your DB instance using the console. Also, you can consume the Enhanced Monitoring JSON output from Amazon CloudWatch Logs in a monitoring system of your choice.
+  - enhanced monitoring for rds: free memory/active memory/swap free/processing running/file system used
+- when resizing ec2 instances with instance store-based, Create an image of your instance, and then launch a new instance from this image with the instance type that you need. Take any Elastic IP address that you've associated with your original instance and associate it with the new instance for uninterrupted service to your application
+- If your Amazon S3 bucket is configured as a website endpoint, you can't configure CloudFront to use HTTPS to communicate with your origin because Amazon S3 doesn't support HTTPS connections in that configuration.
+- If your Amazon S3 bucket is configured as a website endpoint, you can't configure CloudFront to use HTTPS to communicate with your origin because Amazon S3 doesn't support HTTPS connections in that configuration.
+- To permit the usage of a CMK to users and roles in another account, you must use two different types of policies: 1 The key policy for the CMK must give the external account (or users and roles in the external account) permission to use the CMK. 2 IAM policies in the external account must delegate the key policy permissions to its users and roles
+- Create a backup plan in AWS Backup. Assign tags to resources based on the environment ( Production, Development, Testing). Create one backup policy for production environments and one backup policy for non-production environments. Schedule the backup plan based on the organization's backup policies
+- Host the application servers in the public subnet of the VPC and database in the private subnet. The public subnet will connect to the internet using an Internet Gateway configured with the VPC. Database in the private subnet will use Network Address Translation (NAT) gateway, present in the public subnet, to connect to internet
+- Server-Side Encryption with Amazon S3-Managed Keys (SSE-S3), each object is encrypted with a unique key employing strong multi-factor encryption. (AES-256)
+- When you delete a secret, the Secrets Manager deprecates it with a seven-day recovery window. This means that you can't recreate a secret using the same name using the AWS Management Console until seven days have passed. You can permanently delete a secret without any recovery window using the AWS Command Line Interface (AWS CLI). Run the `DeleteSecret` API call with the `ForceDeleteWithoutRecovery` parameter to delete the secret permanently. 
+- When you apply a retention period to an object version explicitly, you specify a `Retain Until Date` for the object version - You can place a retention period on an object version either explicitly or through a bucket default setting. When you apply a retention period to an object version explicitly, you specify a `Retain Until Date` for the object version. 
+- When you use bucket default settings, you don't specify a `Retain Until Date`. Instead, you specify a duration, in either days or years, for which every object version placed in the bucket should be protected.
+- Like all other Object Lock settings, retention periods apply to individual object versions. Different versions of a single object can have different retention modes and periods.
+- Look at the `X-Forwarded-For` header: The `X-Forwarded-For` request header helps you identify the IP address of a client when you use an HTTP or HTTPS load balancer. Because load balancers intercept traffic between clients and servers, your server access logs contain only the IP address of the load balancer. To see the IP address of the client, use the `X-Forwarded-For` request header. Elastic Load Balancing stores the IP address of the client in the `X-Forwarded-For` request header and passes the header to your server.
+- The error indicates the IAM role is not correctly configured. After you've created a flow log, you cannot change its configuration. Instead, you need to delete the flow log and create a new one with the required configuration. the access error can be caused by:
+  - the iam role for the vpc flow log does not have permission to publish flow logs to the cloudwatch logs
+  - iam rolw does not have a trust relationship with flow log service
+  - the trust policy does not specify the flow log service as the principal
+- route 53 geolocation routing: lets you choose the resources that serve your traffic based on the geographic location of your users, meaning the location that DNS queries originate from.
+- Conditions cannot be used within the Parameters section. After you define all your conditions, you can associate them with resources and resource properties only in the Resources and Outputs sections of a template.
+- when a spot instance gets interrupted, we can specify ec2 to do:
+  - stop the spot istance
+  - hibernate the spot instance
+  - terminate the spot instance(default)
+- If you have created an organization in AWS Organizations, you can also create a trail that will log all events for all AWS accounts in that organization. This is referred to as an organization trail.
+  - By default, CloudTrail tracks only bucket-level actions. To track object-level actions, you need to enable Amazon S3 data events
+  - Member accounts will be able to see the organization trail, but cannot modify or delete it
+- Enable S3 Replication Time Control (S3 RTC), which allows you to set up notifications for eligible objects that failed replication.
+  - S3 RTC by default includes S3 replication metrics and S3 event notifications, with which you can monitor the total number of S3 API operations that are pending replication, the total size of objects pending replication, and the maximum replication time.
+  - S3 Replication Time Control (S3 RTC) helps you meet compliance or business requirements for data replication and provides visibility into Amazon S3 replication times. S3 RTC replicates most objects that you upload to Amazon S3 in seconds, and 99.99 percent of those objects within 15 minutes.
+  - You can track replication time for objects that did not replicate within 15 minutes by monitoring specific event notifications that S3 Replication Time Control (S3 RTC) publishes. 
+- Amazon S3 Transfer Acceleration enables fast, easy, and secure transfers of files over long distances between your client and an S3 bucket. Transfer Acceleration takes advantage of Amazon CloudFront’s globally distributed edge locations. As the data arrives at an edge location, data is routed to Amazon S3 over an optimized network path.
+- Multipart upload allows you to upload a single object as a set of parts. Each part is a contiguous portion of the object's data. You can upload these object parts independently and in any order. If transmission of any part fails, you can retransmit that part without affecting other parts. After all parts of your object are uploaded, Amazon S3 assembles these parts and creates the object. In general, when your object size reaches 100 MB, you should consider using multipart uploads instead of uploading the object in a single operation. Multipart upload provides improved throughput, therefore it facilitates faster file uploads.
 
 
 ### Practice Test4
