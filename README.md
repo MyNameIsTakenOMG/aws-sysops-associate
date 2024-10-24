@@ -2217,12 +2217,42 @@ create a Health Check that checks the alarm itself
   - can choose both
 - AWS Personal Health Dashboard provides a personalized view of the health of the specific services that are powering your workloads and applications. - AWS Shield Advanced includes intelligent DDoS attack detection and mitigation not only for network layer (layer 3) and transport layer (layer 4) attacks but also for application layer (layer 7) attacks.
   - AWS Shield Standard cannot protect your AWS bill from usage spikes due to DDoS attacks. 
-
-
-
-
-
-
+- IAM groups:
+  - An IAM user can belong to multiple IAM groups. But, Groups cannot belong to other groups
+  - Groups can be granted permissions using access control policies.
+  - an iam role cannot be assigned to an iam group, but users in the group can assume the role
+- IAM roles:
+  - can be assumed by aws services, iam users, applications
+  - often used for granting temporary permissions
+- to configure a public(public access from outside of vpc) aws aurora cluster with tls:
+  - The Aurora DB instance must have a public IP address
+  - Configure a DB subnet group for public subnets and create the Aurora DB instance from this subnet group
+  - Enable the VPC attributes DNS hostnames and DNS resolution
+- You can configure CloudTrail to deliver log files from multiple regions to a single S3 bucket and a single cloudwatch logs log group for a single account.
+- s3 bucket:
+  - The bucket owner has no permissions on those objects created by other AWS accounts and is not the owner of objects created by other AWS accounts.
+  - The AWS account that created the objects must first grant permission to the bucket owner for delegating permissions to other entities
+- Amazon-issued certificates can’t be installed on an EC2 instance. To enable end-to-end encryption, you must use a third-party SSL certificate
+- AWS CloudFormation gives you an easy way to model a collection of related AWS and third-party resources, provision them quickly and consistently, and manage them throughout their lifecycles, by treating infrastructure as code.
+  - **note**: aws service catalog can only allow product creation from within the catalog whereas cloudformation is more seamless for automating infra
+- ASG scale based on demand (dynamic scaling), for example, cpu utilization
+  - based on schedule
+  - predictive scaling
+- The Snow Family Devices offers a user-friendly tool, `AWS OpsHub` for Snow Family, that you can use to manage your devices and local AWS services. 
+- To use a third-party certificate with a load balancer, you can either import the certificate into ACM or upload a certificate to AWS Identity and Access Management (IAM). But if you could not find the imported certificate, then:
+  - The certificate imported into ACM is using an algorithm other than 1024-bit RSA or 2048-bit RSA.
+  - The ACM certificate wasn't requested in the same AWS Region as your load balancer or CloudFront distribution.
+- The AMIs may have been encrypted using customer-managed customer master keys (CMKs). Additional permissions need to be provided to the Auto Scaling Group to fix the issue. by default, ec2 auto scaling has two service-linked roles, we can choose either one when editing kms key policies to allow instances in the asg to be encrypted with your cmk
+- EBS latency when first access it which was created from a snapshot, we can avoid this performance log by using one of options:
+  - Access each block before putting the volume into production. This process is called initialization (formerly known as pre-warming).
+  - Enable fast snapshot to restore on a snapshot to ensure that the EBS volumes created from it are fully-initialized at creation and instantly deliver all of their provisioned performance.
+- AWS Config sends notifications only when the compliance status changes. If a resource was previously non-compliant and is still non-compliant, Config will not send a new notification. If the compliance status changes to “compliant”, you will receive a notification for the change in status.
+  - **note**: the config rule will continue to be evaluated on the resources
+- Aurora DB cluster metrics:
+  - AuroraReplicaLagMaximum: This metric captures the maximum amount of lag between the primary instance and each Aurora DB instance in the DB cluster.
+  - AuroraBinlogReplicaLag: This metric captures the amount of time a replica DB cluster running on Aurora MySQL-Compatible Edition lags behind the source DB cluster.
+  - AuroraReplicaLag: his metric captures the amount of lag an Aurora replica experiences when replicating updates from the primary instance.
+  - InsertLatency: This metric captures the average duration of insert operations.
 
 
 
