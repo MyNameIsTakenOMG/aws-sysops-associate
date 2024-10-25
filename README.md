@@ -2251,8 +2251,89 @@ create a Health Check that checks the alarm itself
 - Aurora DB cluster metrics:
   - AuroraReplicaLagMaximum: This metric captures the maximum amount of lag between the primary instance and each Aurora DB instance in the DB cluster.
   - AuroraBinlogReplicaLag: This metric captures the amount of time a replica DB cluster running on Aurora MySQL-Compatible Edition lags behind the source DB cluster.
-  - AuroraReplicaLag: his metric captures the amount of lag an Aurora replica experiences when replicating updates from the primary instance.
+  - AuroraReplicaLag: This metric captures the amount of lag an Aurora replica experiences when replicating updates from the primary instance.
   - InsertLatency: This metric captures the average duration of insert operations.
+- AWS storage gateway: cache disk space utilization
+  - if the utilization percentage is low, Don't remove disks that are allocated as cache disks for an existing gateway—doing this can break your gateway's functionality. You can't decrease the size of a cache disk after it's allocated to an existing gateway. Instead, you must create a new gateway with the cache space that you need. Then, you can migrate your data to the new gateway.
+- With AWS Systems Manager, you can manage servers running on AWS, in your on-premises data center, and devices such as Raspberry Pi through a single interface. Systems Manager securely communicates with a lightweight agent installed on your servers and devices to execute management tasks. This helps you manage resources for Windows, Linux, and Raspbian operating systems.
+- AWS Systems Manager allows you to centralize operational data from multiple AWS services and automate tasks across your AWS resources. You can create logical groups of resources such as applications, different layers of an application stack, or production versus development environments. With Systems Manager, you can select a resource group and view its recent API activity, resource configuration changes, related notifications, operational alerts, software inventory, and patch compliance status.
+- Amazon EFS access points are application-specific entry points into an EFS file system that makes it easier to manage application access to shared datasets.
+  - Access points can enforce a user identity, including the user's POSIX groups, for all file system requests that are made through the access point.
+  - Access points can also enforce a different root directory for the file system so that clients can only access data in the specified directory or its subdirectories.
+- The CloudTrail log file integrity validation process also lets you know if a log file has been deleted or changed, or assert positively that no log files were delivered to your account during a given period of time.
+  - Use Amazon S3 MFA Delete on the S3 bucket that holds CloudTrail logs and digest files
+- EFS mount helper:
+  - You can use the EFS mount helper to mount your Amazon EFS file system on Linux instances using AWS Identity and Access Management (IAM) authorization.
+  - To automatically remount your Amazon EFS file system directory when the Amazon EC2 instance reboots, use the file /etc/fstab. The /etc/fstab file contains information about file systems.
+  - EFS does not support ec2 windows instances
+- EBS status `error`:
+  - The error status indicates that the underlying hardware related to the EBS volume has failed. The given EBS volume cannot be recovered but the data can be restored from the backup to a new EBS volume
+- ports:
+  - Many Linux kernels (including the Amazon Linux kernel) use ports 32768-61000.
+  - Windows operating systems through Windows Server 2003 use ports 1025-5000.
+  - Windows Server 2008 and later versions use ports 49152-65535.
+  - Requests originating from Elastic Load Balancing use ports 1024-65535.
+  - A NAT gateway uses ports 1024-65535.
+  - AWS Lambda functions use ports 1024-65535. 
+- DynamoDB can take advantage of DynamoDB Streams and AWS Lambda to integrate seamlessly with one or more existing relational database systems. For this kind of integration to be implemented, essentially three kinds of interoperation must be provided:
+  - Fill the DynamoDB cache incrementally - When an item is queried, look for it first in DynamoDB. If it is not there, look for it in the SQL system, and load it into DynamoDB.
+  - Write through a DynamoDB cache - When a customer changes a value in DynamoDB, a Lambda function is triggered to write the new data back to the SQL system.
+  - Update DynamoDB from the SQL system - When internal processes such as inventory management or pricing change a value in the SQL system, a stored procedure is triggered to propagate the change to the DynamoDB materialized view.
+- When you enable `log file integrity validation`, CloudTrail creates a hash for every log file that it delivers. Every hour, CloudTrail also creates and delivers a file that references the log files for the last hour and contains a hash of each. This file is called a **digest file**.
+  - by default, the log files are encrypted using sse-s3, but we can configure it to use like sse-kms
+  - for the digest files, they are encrypted by sse-s3
+- ec2 IP configurations:
+  - the public ip will be released if there is more than one ENIs attached to the instances
+  - by default, ec2 instances and vpc use IPv4 protocol, we cannot disable it. we can optionally configure IPv6
+  - If the public IP address of your instance in a VPC has been released, it will not receive a new one if there is more than one network interface attached to your instance
+  - By default, AWS does not assign a public IP address to instances launched in a non-default subnet.
+- When you configure an Amazon S3 bucket for website hosting, you must give the bucket the same name as the record that you want to use to route traffic to the bucket. For example, to route traffic for "example.com" to an Amazon S3 bucket that's configured for website hosting, the bucket name must be "example.com".
+- Amazon S3 Glacier and S3 Glacier Deep Archive are designed to be the lowest-cost Amazon S3 storage classes, allowing you to archive large amounts of data at a very low cost.
+  - Amazon S3 Glacier offers a 10 GB retrieval free tier. You can retrieve 10 GB of your Amazon S3 Glacier data per month for free. 
+- Amazon FSx Windows File Server: Amazon FSx provides fully managed Windows file servers with features and performance optimized for "lift-and-shift" business-critical application workloads including home directories (user shares), media workflows, and ERP applications. It is accessible from Windows and Linux instances via the SMB protocol.
+- Linux paravirtual (PV) AMIs aren't supported in all AWS Regions and copying these across unsupported Regions results in this error.
+  - Linux Amazon Machine Images use one of two types of virtualization: paravirtual (PV) or hardware virtual machine (HVM). The main differences between PV and HVM AMIs are how they boot and whether they can take advantage of special hardware extensions (CPU, network, and storage) for better performance.
+  - Linux paravirtual (PV) AMIs aren't supported in all AWS Regions. if we receive like `the kernel is not available in the destination region` when copying ami to another region, then create a new HVM instance and a new ebs volume, then copy over data
+- for StackSet:
+  - For stack sets created with service-managed permissions, you don't have to create the necessary IAM roles
+  - You must set up a trust relationship between the administrator and target accounts before creating stacks in target accounts
+  - Stack sets can be created using either self-managed permissions or service-managed permissions.
+- To make your AWS Service Catalog products available to users who are not in your AWS account, such as users who belong to other organizations or other AWS accounts in your organization, you share your portfolios with them. You can share in several ways:
+  - account-to-account sharing: allow aws service catalog admin to import your portfolio into their account and then distribute to other end-users. in addition, the admin cannot change your portfolio, but can add iam access. the shared portfolio is staying in sync
+  - organizational sharing
+  - deploying catalogs using stack sets.
+- the EFS metric:
+  - `ClientConnections` used to know the number of instances connected
+  - `TotalIOBytes` used to know the throughput
+  - `BurstCreditBalance` used to know the burst credit balance
+- For stored volumes gateways, you can recover data from your most recent Amazon EBS snapshot of the volume
+  - for cachaed volumes gateways, recover data from a recovery snapshot
+  - for stored volumes gateways, recover data from most recent ebs snapshot
+  - for tape gateways, recover one or more tapes from a recovery point
+- If your file system gets corrupted, you can use the `fsck` command to repair it. after the system is repaired, you can then recover your data from the volumes on the file system
+- s3 static website with cloudfront, the route53 Record: Alias
+  - Alias: Amazon Route 53 alias records provide a Route 53–specific extension to DNS functionality. Alias records let you route traffic to selected AWS resources, such as CloudFront distributions and Amazon S3 buckets. They also let you route traffic from one record in a hosted zone to another record.
+  - Unlike a CNAME record, you can create an alias record at the top node of a DNS namespace, also known as the zone apex.
+- to configure a custom domain for cloudfront distribution:
+  - register a custom domain from route53 or domain reigistar
+  - get ssl/tls certificate from a CA for example ACM
+- S3 access points on s3 buckets:
+  - Amazon S3 Access Points is a feature of S3 that simplifies managing data access at scale for applications using shared data sets on S3. Access points are unique hostnames that customers create to enforce distinct permissions and network controls for any request made through the access point.
+  - when to use s3 access point:
+    - large shared data sets
+    - restrict access to vpc
+    - test new access policies
+    - limit access to specific account ids
+    - provide a unique name
+- a NLB configured for cross-zone load balancing, but one of AZs need to be diabled for testing, the optimal way is:
+  - You cannot disable Availability Zones for a Network Load Balancer after you create it
+- Cloud HSM(hardware security module): a specialized security device that generates and stores cryptographic keys.
+  - You should use AWS CloudHSM when you need to manage the HSMs that generate and store your encryption keys.
+- Configure AWS Web Application Firewall (WAF) on CloudFront to keep the AWS infrastructure safe from malicious attacks. Use AWS Firewall Manager to replicate and manage the WAF configurations across AWS accounts 
+- for aws elasticache for redis vs aws elasticache memcached
+  - memcached is relatively simpler compared to redis
+  - redis has more features, thus it is more complex compared to memcached
+
 
 
 
