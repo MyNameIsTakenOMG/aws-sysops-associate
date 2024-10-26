@@ -34,8 +34,8 @@
   - EC2 enhanced networking(sr-iov): elastic network adapter(higher bandwidth)
   - Elastic fabric adapter: improved ENA, `only works for linux`, great for tightly coupled workloads
 - placement groups:
-  - cluster: cluster instances into a low-latency group in a AZ, if AZ fails, all instances will fail
-  - spread: 7 instances per group per AZ (critical apps)
+  - cluster: cluster instances into a low-latency group in a AZ, if AZ fails, all instances will fail, 10 Gbps network
+  - spread: 7 instances per group per AZ (critical apps, apps that need high avalability)
   - partition: up to 7 partitions per AZ, up to 100 instances per group
 - shutdown behavior & termination protection
   - not from `aws console` or `aws cli`, but `$shutdown` from within the ec2 system, then stop(default) or terminate will be performed(two options)
@@ -49,6 +49,7 @@
     - EBS snapshot is corrupt
     - root EBS is encrypted, but you have no permission to decrypt it
     - AMI is missing some required part
+    - **note**: to find out exact reason, check out ec2 console/description tab, the reason is next to the state transition reason label.
 - ec2 ssh troubleshooting
   - make sure the permission code `400` for the private key file`.pem`
   - make sure the username for the OS is giving correctly when logging via ssh.
