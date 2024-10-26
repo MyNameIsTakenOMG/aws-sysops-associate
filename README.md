@@ -104,8 +104,6 @@
   - available for on-demand, reserved, spot
   - hibernate no more than 60 days
 
-
-
 ## AMI
 
 - overview:
