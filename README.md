@@ -380,11 +380,17 @@ many stacks (VPC Id...)
 - cloudformation -- stackSet permission models:
   - self-managed permissions: admin account and trusted target accounts
   - service-managed permissions: aws organization
+  - can automatically deploy stack instances into new accounts in an organization
+  - can delegate stacksets administration to member accounts in a aws organization
+  - trusted access with aws organizations must enabled before delegated administrators can deploy to accounts managed by Organizations
 - cloudformation -- troubleshooting
-  - delete_failed
-  - update_rollback_failed
+  - delete_failed: non-empty s3 buckets, think about using DeletionPolicy=Retain to skip deletions, sg cannot be deleted until all ec2 in a group are gone, use custom resource to automate some actions
+  - update_rollback_failed: need manual fix and call `ContinueUpdateRollback`, can be caused by resoures changed outside of cloudformation, or asg does not receive enough signals...
 - cloudformation -- stackSet troubleshooting
-  - a stack operation failed, and the stack instance status is OUTDATED: could be insufficient permissions, trying to create a global unique resources(s3), admin account has no trust relationship with target account, reached a limit (service quotas) in target account.
+  - a stack operation failed, and the stack instance status is OUTDATED:      - could be insufficient permissions
+    - trying to create a global unique resources(s3),
+    - admin account has no trust relationship with target account,
+    - reached a limit (service quotas) in target account. (too many resources)
 
 
 ## Lambda
@@ -415,32 +421,38 @@ many stacks (VPC Id...)
   - reserved concurrency: at function level
   - throttle behavior: synchronous(429 error), asynchronous(retry and retry interval increase exponentially from 1s to 5min, and then go to DLQ)
   - concurrency issue: if do not set reserved concurrency, then other services may get impacted
-  - cold start(initialize dependencies, sdk,...) & provision concurrency(concurrency allocated, no cold start): 
+  - cold start(initialize dependencies, sdk,...) & provision concurrency(concurrency allocated, no cold start):
+- lambda monitoring -- cloudwatch metrics: invocations, duration, errors, throttles, deadlettererrors, concurrentexecutions, iteratorage
 - lambda monitoring -- cloudwatch alarms
 - lambda monitoring -- cloudwatch logs
-- lambda monitoring -- cloudwatch logs insights
+- lambda monitoring -- cloudwatch logs insights (allow to search through all lambda logs)
   - Collects, aggregates, and summarizes: system-level metrics, diagnostic information
+
+
 
 ## EC2 storage and data management
 
 - EBS: a network drive(like a network usb key) you can attach to your instances while they run. AZ-scoped, persist data, can only be attached to one instance at a time(CCP level), free tier: 30GB
   - to move an ebs from one az to another, you need snapshot
   - provisioned capacity
-- ec2 instance store: ebs has limited performance, while instance store is high-performance hardware disk.
+- ec2 instance store: ebs has limited performance, while instance store is high-performance hardware disk. backup and replication are your responsibility.
   - better I/O; ephemeral; good for cache, buffer...
 - ebs volume types:
   - gp2/gp3: SSD general purpose, Cost effective storage, low-latency. System boot volumes,Virtual desktops, Development and test environments. gp3: IOPS and throughput are independent while gp2 is not
   - io1/io2: SSD high performance. Great for databases workloads
-  - st1: HDD low cost HDD
-  - sc1: HDD lowest cost
+  - io2: IOPS:GiB = 1000:1, max IOPS 256,000
+  - io1: max IOPS 64,000, iops independent from storage size
+  - st1: HDD low cost HDD: max iops 500
+  - sc1: HDD lowest cost: max iops 250
   - **note:** only gp2/gp3 and io1/io2 can be used as boot volume.
 - ebs multi-attach -- io1/io2 family
   - Up to 16 EC2 Instances at a time
+  - applications must manage concurrent write operations
   - Must use a file system that’s cluster-aware (not
 XFS, EXT4, etc...)
 - ebs volume resizing
   - can only increase: ebs size, IOPS(io1)
-  - after resizing an ebs volume, we need to repartition the drive, and it is possible for the volume to be in the `optimization` phase for a long time, the volume is still usable
+  - after resizing an ebs volume, we need to `repartition` the drive, and it is possible for the volume to be in the `optimization` phase for a long time, the volume is still usable
   - cannot decrease the size, must create a new one and migrate data
 - ebs snapshot: no need to detach the volume to make a snapshot, but recommended. 
 - amazon data lifecycle manager: Automate the creation, retention, and deletion of EBS snapshots and EBS-backed AMIs.
@@ -472,10 +484,15 @@ XFS, EXT4, etc...)
   - over 90% cost-saving
 - ebs vs efs
   - ebs: root ebs volume will be terminated by default, but can be disabled
+    - gp2: io increases along with storage size
+    - gp3 & io1: can increase io and storage size independently
   - efs: can be mounted onto multiple instances across az, only for linux
 - efs access point: can manage who can access which files or directories, specify different root directory
 - efs operations: lifecycle policies, throughput mode and provisioned mode, access point, or using datasync to migrate data to another efs (could be encrypted)
 - efs cloudwatch metrics: percentIOLimit; burstcreditBalance, storageBytes
+
+
+
 
 ## S3
 
@@ -492,13 +509,22 @@ XFS, EXT4, etc...)
   - resource-based: bucket policies, object access control, bucket access control
   - encryption:
 - s3 bucket settings for block public access: These settings were created to prevent company data leaks
+- s3 bucket policies: can be used to grant access to another account(cross account)
+  - aws organization: aws:PrincipalOrgID
+  - object encryption: s3:x-amz-server-side-encryption
+  - ip address: NotIpAddress
+  - MFA: aws:MultiFactorAuthPresent
 - s3 static website hosting
+  - for 403 forbidden error, make sure the bucket policy allow public reads
 - s3 versioning: enabled at the bucket level
+  - any file prior to visioning will have version 'null'
+  - suspending versioning does not  delete the previous versions
 - s3 replication (CRR and SRR):
+  - copy is asynchronous
   - must enable versioning in source and destination buckets
   - cross-region replication
   - same-region replication
-  - only new objects will be replicated after enabling replication. Or using s3 batch replication to replicate exsiting objects
+  - only new objects will be replicated after enabling replication. Or using `s3 batch replication` to replicate exsiting objects
   - for delete operation: can replicate delete marker, deletion with a version id are not replicated
   - there is no `chaining` of replication    
 - s3 storage classes: (move manually or s3 lifecycle configuration)
@@ -508,7 +534,12 @@ XFS, EXT4, etc...)
   - glacier instant retrieval: minimal storage duration 90 days, millisecond retrieval, query once a quarter
   - glacier flexible retrieval: (1-5min, 3-5hrs, 5-12hrs), 90 days minimal
   - glacier deep archive: 12 hrs, 48hrs(bulk), duration minimal 180 days
-  - intelligent tiering: Small monthly monitoring and auto-tiering fee, no retrieval fee, move objects automatically
+  - intelligent tiering: Small monthly monitoring and auto-tiering fee, no retrieval fee, move objects automatically based on their usage:
+    - frequent access tier(default tier)
+    - infrequent access tier: 30 days
+    - archive instant access tier: 90 days
+    - archive access tier(optional): 90-700+ days
+    - deep archive access tier(optional): 180-700+ days
 - s3 high durability and high availability
 
 
@@ -518,10 +549,11 @@ XFS, EXT4, etc...)
   - moving objects can be automated using `lifecycle rules`
   - ordering: standard, standard IA, intelligent tier, one-zone IA, glacier instant retrieval, glacier flexible retrieval, glacier deep archive
 - s3 lifecycle rule: can be created for a certain prefix, or certain object tags
-  - transition actions: configure objects to transition to another storage class
-  - expiration actions: configure objects to expire (delete) after some time, can be used to delete incomplete Multi-Part uploads or old versions of objects
+  - `transition actions`: configure objects to transition to another storage class
+  - `expiration actions`: configure objects to expire (delete) after some time, can be used to delete incomplete Multi-Part uploads or old versions of objects
+  - rules can be created for a certain prefix or object tags
 - s3 analytics -- storage class analysis: Help you decide when to transition objects to the right storage class
-  - Recommendations for Standard and Standard IA: does not work for one-zone IA or glacier
+  - Recommendations for `Standard` and `Standard IA`: does not work for one-zone IA or glacier
   - Good first step to put together Lifecycle Rules
   - 24-48 to see the data analysis
   - report daily
@@ -529,7 +561,7 @@ XFS, EXT4, etc...)
   - lambda (resource policy)
   - sqs (resource policy)
   - sns (resource policy)
-  - eventbridge (advanced filtering, multi-destinations, eventbridge capabilities)
+  - eventbridge (advanced filtering, multi-destinations, eventbridge capabilities: repliable delivery, archive, replay events)
 - s3 baseline performance
   - automatically scale
   - 3500 put/copy/post/delete or 5500 get/head requests per second per prefix in a bucket (tip: instead of using root path of prefix, separate each subpath to have more throughput)
@@ -541,7 +573,7 @@ XFS, EXT4, etc...)
     - Can be used to speed up downloads.
     - Can be used to retrieve only partial data (for example the head of a file)
 - s3 batch operations
-  - work with s3 inventory(get object list), s3 select(filter your objects)
+  - work with s3 inventory(get object list as well as their corresponding metadata), s3 select(filter your objects)
   - A job consists of a list of objects, the action to perform, and optional parameters
 - s3 inventory: List objects and their corresponding metadata (alternative to S3 List API
 operation)
@@ -550,6 +582,8 @@ operation)
 - s3 glacier: Low-cost object storage meant for archiving / backup
   - Each item in Glacier is called “Archive” (up to 40TB)
   - Archives are stored in ”Vaults”
+  - By default, data encrypted at rest using AES-256 – keys managed by AWS
+  - Exam tip: archival from S3 after XXX days => use Glacier
 - s3 glacier operations
   - vault operations: create&delete, retrieving metadata, download inventory
   - glacier operations: upload, download, delete
@@ -558,11 +592,12 @@ operation)
     - expedited (1-5 mins)
     - standard (3-5 hrs)
     - bulk (5-12 hrs)
-- s3 vault policies and vault lock
-  - each vault has one vault access policy(like bucket policy) and vault lock policy( for regulatory and compliance requirements)
-- s3 notifications for restore operations
+- s3 glacier vault policies and vault lock
+  - each vault has one vault access policy(like bucket policy)
+  - vault lock policy( for regulatory and compliance requirements)
+- s3 glacier notifications for restore operations
   - vault notification configuration: Configure a vault so that when a job completes, a message is sent to SNS. Optionally, specify an SNS topic when you initiate a job.
-  - s3 event notification: S3 supports the restoration of objects archived to S3 Glacier storage classes. Notify when restore job initiated, or notify when restore job is completed
+  - s3 glacier event notification: S3 supports the restoration of objects archived to S3 Glacier storage classes. Notify when restore job initiated, or notify when restore job is completed
 - s3 multi-part upload: (max parts: 10000)
   - Recommended for files > 100MB, must use for files > 5GB 
   - failures: restart the failed parts
@@ -589,33 +624,58 @@ operation)
   - client-side encryption: use client libraries, such as `Amazon S3 Client-Side Encryption Library`. clients must encrypt/decrypt by themselves
 - s3 encryption in transit(SSL/TLS)
   - for SSE-C, https is mandatory
-- s3  force encryption in transit by using bucket policy( condition: aws:SecureTransport)
+- s3  force encryption in transit by using bucket policy( `condition: aws:SecureTransport`)
 - s3 default encryption vs bucket policy
-  - NOTE: Bucket Policies are evaluated before “Default Encr yption”
+  - NOTE: Bucket Policies are evaluated before “Default Encryption”
 - s3 cors: If a client makes a cross-origin request on our S3 bucket, we need to enable the correct CORS headers. You can allow for a specific origin or for * (all origins)
 - s3 MFA delete: To use MFA Delete, Versioning must be enabled on the bucket. Only the bucket owner (root account) can enable/disable MFA Delete
+  - required:
+    - permanently delete an object version
+    - suspend versioning on the bucket
+  - not required:
+    - enable versioning
+    - list deleted versions
+  - to use MFA delete, versioning must be enabled
+  - only the bucket owner(root account) can enable/disable MFA delete
 - s3 access logs: Any request made to S3, from any account, authorized or denied, will be logged into another S3 bucket. The target logging bucket must be in the same AWS region
   - warning: Do not set your logging bucket to be the monitored bucket, or it will grow exponentially because of a logging loop
 - s3 pre-signed url: Generate pre-signed URLs using the S3 Console, AWS CLI or SDK
+  - user given a pre-signed url inherit the permissions of the user who created the pre-signed url
+  - use cases:
+    - allow only logged-in users to download a premium video
+    - allow an ever-changing list of users to download files
+    - allow temporarily a user to upload a file
 - s3 glacier vault lock: adopt a write once read many model with a vault lock policy
+  - lock the policy for future edits, helpful for compliance and data retention
 - s3 object lock(versioning is required)
   - retention mode - compliance
-  - retention mode - governance
+  - retention mode - governance (some users have special permissions to change the retention or delete the object)
   - retention period - can be extended
   - legal hold: protect objects independently from retention period
+    - independent from retention period
+    - can be freely placed and removed using iam permission: `s3:PutObjectLegalHold`
 - s3 access point: simplify security management for S3 Buckets
   - each access point has its own dns name
   - access point policy like bucket policy (permissions + path)
   - vpc origin: vpc endpoint(gateway endpoint or interface endpoint) to allow access to the target bucket and its access point
+    - vpc endpoint: endpoint policy (must allow access to the bucket as well as the access point)
+    - access point(vpc origin): access policy
+    - s3 bucket: bucket policy
 - s3 multi-region access points: bi-directional s3 bucket replication rules, dynamic routing, failover controls
+  - create a global endpoint that span s3 bucket in multiple aws regions
+  - dynamically route requests to the nearest s3 bucket
+  - bi-directional s3 bucket replication rules are created to data in sync across regions
+  - failover control
 - vpc endpoint gateway for s3
   - for private subnet, use vpc endpoint gateway
   - for public subnet, use internet gateway
 
+
+
 ## Advanced storage solutions
 
-- aws snow family: Highly-secure, portable devices to collect and process data at the
-edge, and migrate data into and out of AWS
+- aws snow family: Highly-secure, portable devices to collect and process data at the edge, and migrate data into and out of AWS
+  - offline devices to perform data migrations
 - snow family usage process:
   - request snowball device
   - install snowball client on the server
@@ -623,15 +683,18 @@ edge, and migrate data into and out of AWS
   - ship the device back to aws
   - data will be loaded to s3 bucket and device will be wiped
 - edge computing: processing data at locations where internet is limited or no access to computing power.
+  - use cases: preprocess data, machine learning,transcoding media
   - setup snowball, snowcone to do data process
 - aws fsx overview: Fully managed service, Launch 3rd party high-performance file systems on AWS
 - aws fsx for windows (file server)
   - support SMB protocal and windows NTFS
-  - can be mounted on linux
+  - can be mounted on linux ec2 instances
+  - support microsoft active directory 
   - support Microsoft's Distributed File System (DFS) Namespaces
+  - data is backed-up daily to s3
 - aws fsx for lustre: The name Lustre is derived from “Linux” and “cluster
   - Machine Learning, High Performance Computing (HPC)
-  - Seamless integration with S3 (optional data repository)
+  - Seamless integration with S3 (optional data repository), can read s3 as a file system through fsx
   - Can be used from on-premises servers (VPN or Direct Connect)
   - File System Deployment Options: Scratch File System(data is not replicated), Persistent File System(Data is replicated within same AZ)
 - aws fsx for NetApp ONTAP: File System compatible with NFS, SMB, iSCSI protocol
@@ -650,15 +713,20 @@ edge, and migrate data into and out of AWS
   - object: s3, glacier
 - aws storage gateway: Bridge between on-premises data and cloud data. DR, backup&restore, tiered storage, on-prem cache & low-latency access
   - s3 file gateway: configure using SMB/NFS procotol, lifecycle policy, iam permission, SMB integrated with microsoft AD
-  - fsx file gateway: native access to fsx for windows, natively compatible with SMB, NTFS,AD 
+    - most recently used data is cached in the file gateway
+    - transition to s3 glacier using a lifecycle policy
+  - fsx file gateway: native access to fsx for windows, natively compatible with SMB, NTFS,AD
+    - local cache for frequently accessed data
   - volume gateway: block storage using iSCSI protocol backed by s3, backed by EBS snapshots. Cached volumes, Stored volumes
+    - cached volumes: low latency access to most recent data
+    - stored volumes: entire dataset is on premise, scheduled backups to s3
   - tape gateway: VirtualTape Library (VTL) backed by Amazon S3 and Glacier
-- Storage Gateway – Hardware appliance: Using Storage Gateway means you need on-premises virtualization. Otherwise, you can use a Storage Gateway Hardware Appliance
+- Storage Gateway – Hardware appliance: Using Storage Gateway means you need on-premises virtualization. Otherwise, you can use a `Storage Gateway Hardware Appliance`
 - storage gateway sysops
   - File Gateway is POSIX compliant (Linux file system)
   - Reboot Storage Gateway VM: (e.g., maintenance)
     - File Gateway: simply restart the Storage GatewayVM
-    - Volume and Tape Gateway: Stop Storage Gateway Service; Reboot the Storage Gateway VM; Start Storage Gateway Service
+    - Volume and Tape Gateway: Stop `Storage Gateway Service`; Reboot the Storage Gateway VM; Start `Storage Gateway Service`
 - storage gateway activation
   - get activation key:
     - Using the Gateway VM CLI
@@ -669,17 +737,22 @@ edge, and migrate data into and out of AWS
 - storage gateway -- volume gateway cache
   - cache mode: only the most recent data is stored
   - cache efficiency:
-    - Look at the CacheHitPercent metric (you
+    - Look at the `CacheHitPercent` metric (you
 want it to be high)
-    - Look at the CachePercentUsed (you don’t want it to be too high)
-  - create a larger cache disk: Use the cached volume to clone a new volume of a larger size and use it as the cached volume
+    - Look at the `CachePercentUsed` (you don’t want it to be too high)
+  - create a larger cache disk:
+    - Use the cached volume to clone a new volume of a larger size
+    - select it as the cached volume
+
+
+
   
 ## Cloudfront
 
 - overview: Content Delivery Network (CDN). Improves read performance, content is cached at the edge. DDoS protection (because worldwide), integration with Shield, AWS Web Application Firewall
 - cloudfron origins
   - s3 buckets: origin access control + s3 bucket policy
-  - custom origin(http): alb, ec2, s3 website, any http backend
+  - custom origin(http): alb, ec2, s3 website(s3 static website), any http backend
 - cloudfront vs s3 cross-region replication
   - cloudfront: global edge network, files cached for a ttl, great for static content available anywhere
   - s3: read-only, must be setup for each region that needs replication. Great for dynamic content that needs to be available at low-latency in few regions
@@ -727,6 +800,7 @@ want it to be high)
 - cloudfront with alb sticky session
   - Must forward / whitelist the cookie that controls the session affinity to the origin to allow the session affinity to work
   - Set a TTL to a value lesser than when the authentication cookie expires
+
 
 
 ## Databases
@@ -861,6 +935,8 @@ want it to be high)
   - currconnections
   - freeablememory
 
+
+
 ## Monitoring and audit and performance
 
 - cloudwatch metrics overview:
@@ -992,6 +1068,8 @@ want it to be high)
   - cloudtrail: record api calls, global service, enabled by default
   - config: Record configuration changes, Evaluate resources against compliance rules,Get timeline of changes and compliance
 
+
+
 ## Account management
 
 - aws health dashboard
@@ -1076,6 +1154,8 @@ por tfolio); Deploy a copy of the portfolio into the recipient account (must re-
   - lower costs up to 25%
   - supported resources: ec2, ec2 asg, ebs, lambda
 
+
+
 ## Disaster recovery
 
 - aws datasync
@@ -1096,6 +1176,8 @@ por tfolio); Deploy a copy of the portfolio into the recipient account (must re-
   - backup to s3 bucket
 - aws backup vault lock: Enforce a WORM (Write Once Read Many) state for all the backups that you store in your AWS Backup Vault
   - Even the root user cannot delete backups when enabled
+
+
 
 ## Security and compliance
 
@@ -1275,6 +1357,8 @@ por tfolio); Deploy a copy of the portfolio into the recipient account (must re-
   - CloudTrail records these events as non-API service events: RotationFailed event, RotationSucceeded event, RotationAbandoned event, CancelSecretVersionDelete event,...
   - Combine with CloudWatch Logs and CloudWatch alarms for automations
 
+
+
 ## Identity
 
 - iam security tools
@@ -1340,6 +1424,8 @@ the Client Side
   - Cognito User Pools (for authentication = identity verification)
   - Cognito Identity Pools (for authorization = access control)
   - CUP + CIP = authentication + authorization
+
+
 
 ## VPC
 
@@ -1599,6 +1685,8 @@ connect to the Internet
     - **Active flow inspection** to protect against network threats with intrusion- prevention capabilities (like Gateway Load Balancer, but all managed by AWS)
     - Send logs of rule matches to Amazon S3, CloudWatch Logs, Kinesis Data Firehose
 
+
+
 ## Route 53
 
 - DNS: Domain Name System which translates the human friendly hostnames into the machine IP addresses
@@ -1766,6 +1854,7 @@ create a Health Check that checks the alarm itself
   - Resolver Rules can be shared across accounts using AWS RAM:
     - Manage them centrally in one account
     - Send DNS queries from multiple VPC to the target IP defined in the rule
+
 
 ## Other services
 
