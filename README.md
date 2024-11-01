@@ -1038,6 +1038,7 @@ want it to be high)
   - Get an history of events / API calls made within your AWS Account
   - Provides governance, compliance and audit for your AWS Account
   - Can put logs from CloudTrail into CloudWatch Logs or S3
+  - a trail can be applied to all regions(default) or a single region
 - cloudtrail events:
   - management events:Operations that are performed on resources in your AWS account
   - Data Events: By default, data events are not logged (because high volume operations)
@@ -1046,11 +1047,11 @@ want it to be high)
 - cloudtrail events retention:
   - 90 days, could send to s3 using athena to do analysis
 - cloudtrail log files integrity validation
-  - digest files: References the log files for the last hour and contains a hash of each. store files in s3 bucket
+  - `digest files`: References the log files for the last hour and contains a hash of each. store files in s3 bucket
   - help determine if files have been modified since being delivered by cloudtrail
 - cloudtrail and eventbridge
   - used to react to any api calls
-  - cloudtrail is not real-time:
+  - cloudtrail is `not real-time`:
     - log files to s3: every 5 min
     - event: within 15 min
 - cloudtrail organization trail: A trail that will log all events for all AWS accounts in an AWS Organization
@@ -1060,10 +1061,14 @@ want it to be high)
   - Helps record configurations and changes over time
   - You can receive alerts (SNS notifications) for any changes
   - a per-region service
+  - can be aggregated across regions and accounts
+  - can store configuration data into s3
 - config rules
   - aws managed rules(over 75)
   - custom rules
-  - rules can be evaluated/triggered when config changes or at regular intervals
+  - rules can be evaluated/triggered:
+    - when config changes
+    - and / or at regular intervals
   - AWS Config Rules does not prevent actions from happening (no deny)
   - no free tier
 - aws config resource
