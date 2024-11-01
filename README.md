@@ -809,6 +809,10 @@ want it to be high)
   - note: you cannot ssh into the db instance
   - point-in-time-restore, os patching, multi-az for DR, horizontal and vertical scalability,...
 - rds storage auto-scaling(when db instance runs out of free storage): can set Maximum storage threshold; useful for applications with unpredictable workloads; support all rds db engines
+  - automatically modify storage if:
+    - less than 10% allocated storage
+    - low-storage lasts at leas 5 min
+    - 6 hrs have passed since last modification
 - rds read replicas for read scalability:
   - only for read
   - up to 15;
@@ -827,6 +831,10 @@ want it to be high)
 - rds from single az to multi az
   - zero downtime
   - click `modify` on the db, then a snapshot is taken, then a new db instance is created from it, then the synchronization is established
+- RDS multi-az failover conditions
+  - the primary db: network issue, storage failure, os patching, db instance changed(like instance type)
+  - an az is down
+  - a manual failover of the db instance is initiated using `Reboot with failover`
 - lambda and rds:
   - lambda by default is launched in aws public network, it cannot connect to rds. so it is needed to be in the same vpc where the rds is, then an ENI will be created and configured by aws automatically
 - rds proxy for aws lambda: The Lambda function must have connectivity to the Proxy (public proxy => public Lambda, private proxy => Lambda in VPC)
@@ -834,6 +842,7 @@ want it to be high)
 - db parameter groups
   - Dynamic parameters are applied immediately
   - Static parameters are applied after instance reboot
+  - when modified the parameter group associated with a DB (must reboot)
   - Must-know parameter:
     - PostgreSQL / SQL Server: rds.force_ssl=1 => force SSL connections
     - MySQL / MariaDB: require_secure_transport=1 => force SSL connections
@@ -849,7 +858,7 @@ want it to be high)
   - rds keeps records of db instance, snapshots, parameter groups,...
   - subscription: sns
   - rds delivers events to eventbridge
-- rds db logs: sent to cloudwatch logs, use metric filter to create metrics and set alarms on them
+- rds db logs files: sent to cloudwatch logs, use metric filter to create metrics and set alarms on them
 - rds with cloudwatch
   - cloudwatch metrics
   - enhanced monitoring(gathered from an agent on the db instance) 
@@ -881,13 +890,19 @@ want it to be high)
     - If replicas have the same priority, RDS promotes the largest in size
     - If replicas have the same priority and size, RDS promotes arbitrary replica
   - You can migrate an RDS MySQL snapshot to Aurora MySQL Cluster
-- aurora cloudwatch metrics: AuroraReplicaLag, DatabaseConnections, ...
+- aurora cloudwatch metrics:
+  - AuroraReplicaLag
+  - AuroraReplicaLagMaximum
+  - AuroraReplicaLagMinimum
+    - if the replica lag is high, that means the users will have a different experience based on which replica they get the data from(eventual consistency)
+  - DatabaseConnections
+  - InsertLatency
 - rds & aurora security
-  - at-rest encryption: master & replicas use aws kms(defined at the launch time), if master not encrypted, then replicas not either, to encrypt an unencrypted db, go with snapshots
+  - at-rest encryption: master & replicas use aws kms(must defined at the launch time), if master not encrypted, then replicas not either, to encrypt an unencrypted db, go with snapshots
   - in-flight encryption: tls by default
   - security group
   - iam authentication
-  - no ssh, except for rds custom
+  - no ssh, except for `rds custom`
   - audit logs can be enabled and sent to cloudwatch
 - elasticache overview: managed service for redis and memcached the same way as rds for relational dbs
 - elasticache solution architecture:
@@ -898,6 +913,7 @@ want it to be high)
   - memcached: multi node partition, no HA, no backup and restore, no persistence, multi-threading architecture
 - elasticache replication: cluster mode disabled
   - one shard: one main node, multi replicas nodes(up to 5), async replication, multi az by default for failover
+  - scaling: horizontal (max 5 replicas); vertical: change node type, will internally create a new node group,and then data replication and DNS update
 - elasticache replication: cluster mode enabled
   - Data is partitioned across shards (helpful to scale writes)
   - up to 500 nodes per cluster(shards)
@@ -914,9 +930,12 @@ want it to be high)
   - vertical: create a new node group with different node size
 - redis scaling: cluster mode enabled
   - two mode: online scaling; offline scaling
-  - horizontal: resharding, shard rebalancing, support online and offline scaling 
-  - vertical: change read/write capacity. support online scaling
-- redis metrics: evictions(evict LRU items, scale up/out), cpuutilization(scale up/out), swapusage: should not exceed 50 MB (verify there is enough reserved memory)
+  - horizontal: resharding, shard rebalancing, support `online` and `offline` scaling 
+  - vertical: change read/write capacity. support `online scaling`
+- redis metrics:
+  - evictions(evict LRU items, scale up/out),
+  - cpuutilization(scale up/out),
+  -   swapusage: should not exceed 50 MB (verify there is enough reserved memory)
   - currconnections
   - databaseMemoryUsagepercentage
   - NetworkBytesIn/Out & NetworkPacketsIn/Out
