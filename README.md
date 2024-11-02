@@ -1148,8 +1148,10 @@ based Access Control
     - Automate the set up of your environment in a few clicks
 - aws service catalog: users just want a quick self-service portal to launch a set of authorized products pre-defined by admins
   - portfolio: collections of products (cloudformation templates) with iam permissions to control access
-  - sharing catalog: Share a reference of the portfolio, then import the shared portfolio in the recipient account (stays in-sync with the original
-por tfolio); Deploy a copy of the portfolio into the recipient account (must re-deploy any updates)
+  - sharing catalog:
+    - Share a reference of the portfolio, then import the shared portfolio in the recipient account (stays in-sync with the original
+por tfolio);
+    - Deploy a copy of the portfolio into the recipient account (must re-deploy any updates)
   - tagOptions library: Easily manage tags on provisioned products. managed in service catalog. Can be associated with Portfolios and Products
 - aws billing alarms
   - Billing data metric is stored in CloudWatch us-east-1
@@ -1157,7 +1159,7 @@ por tfolio); Deploy a copy of the portfolio into the recipient account (must re-
   - It’s for actual cost, not for project costs
 - cost explorer: Visualize, understand, and manage your AWS costs and usage over time
   - can create custom report
-  - Choose an optimal Savings Plan (to lower prices on your bill)
+  - Choose an optimal `Savings Plan` (to lower prices on your bill)
   - Forecast usage up to 12 months based on previous usage
 - aws budget: Create budget and send alarms when costs exceeds the budget
   - 4 types of budgets: Usage, Cost, Reservation, Savings Plans
@@ -1207,7 +1209,7 @@ por tfolio); Deploy a copy of the portfolio into the recipient account (must re-
 
 - aws shared responsibility model
   - AWS responsibility - Security of the Cloud: managed services, protecting infra
-  - Customer responsibility - Security in the Cloud: network, iam, firewall, encryption,...
+  - Customer responsibility - Security in the Cloud: ec2 guest os,network, iam, firewall, encryption,...
   - Shared controls: Patch Management, Configuration Management, Awareness & Training
 - DDoS protection on AWS
   - aws shield standard: protects against DDoS attack for your website and applications
@@ -1295,7 +1297,11 @@ por tfolio); Deploy a copy of the portfolio into the recipient account (must re-
 - kms automatic key rotation
   - AWS-managed KMS Keys: automatically rotated every 1 year
   - For Customer-Managed `Symmetric KMS Key`: key rotation is optional, rotation period is between 90-2560 days, Previous key is kept active so you can decrypt old data, New Key has the same KMS Key ID (only the backing key is changed)
-    - on-demand rotation(For Customer-Managed Symmetric KMS Key (not AWS managed CMK)): no need to enable auto-rotation, no need to change existing rotation schedule, limited times of triggering on-demand rotations
+- on-demand rotation:
+  - (For Customer-Managed Symmetric KMS Key (not AWS managed CMK))
+  - no need to enable auto-rotation,
+  - no need to change existing rotation schedule,
+  - limited times of triggering on-demand rotations
 - KMS Manual Key Rotation
 (Customer-Managed Symmetric KMS Key & Imports):
   - New Key has a different KMS Key ID
@@ -1309,7 +1315,12 @@ por tfolio); Deploy a copy of the portfolio into the recipient account (must re-
   - Schedule CMK for deletion with a waiting period of 7 to 30 days(pending deletion): during which, the cmk key cannot be used for encryption or be rotated
   - can cancel the key deletion during the waiting period
   - Consider disabling your key instead of deleting it if you’re not sure!
-- KMS Key Deletion – CloudWatch Alarm: Use CloudTrail, CloudWatch Logs, CloudWatch Alarms and SNS to be notified when someone tries to use a CMK that’s ”Pending deletion” in a cryptographic operation (Encrypt, Decrypt, ...)
+- KMS Key Deletion – CloudWatch Alarm: Use CloudTrail, CloudWatch Logs, CloudWatch Alarms and SNS to be notified when someone tries to use a CMK that’s ”Pending deletion” in a cryptographic operation (Encrypt, Decrypt, ...):
+  - cryptographic operation -> cmk (pending deletion)
+  - log (api calls denied) to cloudtrail
+  - cloudtrail logs -> cloudwatch logs
+  - using `Metric Filter`: "* is pending deletion" and create an alarm based on it
+  - using SNS to notify users
 - CloudHSM(Hardware Security Module)
   - KMS => AWS manages the software for encryption
   - CloudHSM => AWS provisions encryption hardware, tamper resistant,
@@ -1324,6 +1335,7 @@ por tfolio); Deploy a copy of the portfolio into the recipient account (must re-
 - cloudHSM integrated with aws service
   - integrated with kms
   - configure kms custom key store with cloudHSM
+  - a single-tenant
 - aws artifact( not a service): Portal that provides customers with on-demand access to AWS compliance documentation and AWS agreements
   - artifact reports
   - artifact agreements
@@ -1379,7 +1391,7 @@ por tfolio); Deploy a copy of the portfolio into the recipient account (must re-
   - cloudtrail records api calls
   - cloudtrail captures other related events that might have a security or compliance impact on your AWS account or might help you troubleshoot operational problems.
   - CloudTrail records these events as non-API service events: RotationFailed event, RotationSucceeded event, RotationAbandoned event, CancelSecretVersionDelete event,...
-  - Combine with CloudWatch Logs and CloudWatch alarms for automations
+  - Combine with CloudWatch Logs using Metric filter and CloudWatch alarms for automations
 
 
 
@@ -1589,6 +1601,7 @@ connect to the Internet
     - Incoming Requests
     - Outgoing Requests
 - AWS Site-to-Site VPN
+  - it is still using `public network`, but secure the connection using encryption and encapsulation.
   - Virtual Private Gateway (VGW): VPN concentrator on the AWS side of the VPN connection
   - Customer Gateway (CGW): Software application or physical device on customer side of the VPN connection
   - Site-to-Site VPN Connections
@@ -1647,7 +1660,7 @@ connect to the Internet
   - Use case: create multiple Site- to-Site VPN connections to increase the bandwidth of your connection to AWS
 - Transit Gateway: throughput with ECMP
 - Transit Gateway – Share Direct Connect between multiple accounts: You can use AWS Resource Access Manager to share Transit Gateway with other accounts.
-- VPC – Traffic Mirroring
+- VPC – Traffic Mirroring (kinda like gateway load balancer)
   - Allows you to capture and inspect network traffic in your VPC
   - Route the traffic to security appliances that you manage
   - Capture the traffic: from(source):ENIs, to(target): an ENI or nlb
@@ -1693,11 +1706,11 @@ connect to the Internet
   - aws shield & aws shield advanced
   - aws firewall manager(to manage them across accounts)
   - But what if we want to protect in a sophisticated way our entire VPC?
-- AWS Network Firewall
+- AWS Network Firewall( for your VPC )
   - Protect your entire Amazon VPC
   - From Layer 3 to Layer 7 protection
   - any direction: vpc-vpc, outbound to internet, inbound from internet, To/from Direct Connect & Site-to-Site VPN
-  - internally, the aws network firewall uses the aws gateway load balancer
+  - internally, the aws network firewall uses the aws `gateway load balancer`
   - Rules can be centrally managed cross- account by AWS Firewall Manager to apply to many VPCs
   - Fine Grained Controls:
     - support 1000s of rules:
@@ -1850,7 +1863,7 @@ create a Health Check that checks the alarm itself
   - create a hosted zone in route 53
   - Update NS Records on 3rd party website to use Route 53 Name Servers
 - S3 Website with Route 53
-  - Create an S3 bucket with the same name as the target record
+  - Create an S3 bucket with the `same name` as the target record
   - Enable S3 website on the bucket (and enable S3 bucket public settings)
   - Create a Route 53 Alias record to the S3 website endpoint or type A – IPv4 address
   - This only works for HTTP traffic (for HTTPS, use CloudFront)
