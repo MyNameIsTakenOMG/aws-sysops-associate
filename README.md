@@ -25,6 +25,7 @@
 - [Route 53](#route-53)
 - [Other services](#other-services)
 - [Tests reviews](#tests-reviews)
+- [Tests reviews 2](#tests-reviews-2)
 
 
 ## EC2 for SysOps
@@ -2484,6 +2485,54 @@ create a Health Check that checks the alarm itself
 - for aws elasticache for redis vs aws elasticache memcached
   - memcached is relatively simpler compared to redis
   - redis has more features, thus it is more complex compared to memcached
+
+
+
+## Tests reviews 2
+
+### Table of Content
+- [practice test](#practice-test)
+
+
+#### practice test
+
+- Incorrect:
+  - You must stop your Amazon EBS–backed instance before you can change its instance type. When you stop and start an instance, AWS moves the instance to new hardware; however, the instance ID does not change.
+  - if the root device is ebs volume, then can resize, but if it is instance store volume, then need to migrate
+  - after resizing, the public IP will be released, but EIP, IPv6 and instance ID will remain
+  - consider using enhanced networking:
+    - If your packets-per-second rate reaches its ceiling, consider moving to enhanced networking. If your rate reaches its ceiling, you've likely reached the upper thresholds of the virtual network interface driver.
+    - If your throughput is near or exceeding 20K packets per second (PPS) on the VIF driver, it's a best practice to use enhanced networking.
+  - You can register a target with multiple target groups.
+  - Scheduled events are managed by AWS; you cannot schedule events for your instances.
+  - A simple GET does not retrieve delete marker objects.
+  - The only way to list delete markers (and other versions of an object) is by using the versions subresource in a GET Bucket versions request.
+
+- correct:
+  - Amazon S3 default encryption provides a way to set the default encryption behavior for an S3 bucket. You can set default encryption on a bucket so that all new objects are encrypted when they are stored in the bucket.
+  - Amazon RDS provides metrics in real time for the operating system (OS) that your DB instance runs on. You can view the metrics for your DB instance using the console. Also, you can consume the Enhanced Monitoring JSON output from Amazon CloudWatch Logs in a monitoring system of your choice.
+  - With Amazon EBS, you can use any of the standard RAID configurations that you can use with a traditional bare metal server, as long as that particular RAID configuration is supported by the operating system for your instance.
+    - RAID 0: high I/O
+    - RAID 1: fault tolerance
+  - You can't enable termination protection for Spot Instances. Spot Instance is terminated when the Spot price exceeds the amount you're willing to pay for Spot Instances.
+  - The `DisableApiTermination` attribute does not prevent Amazon EC2 Auto Scaling from terminating an instance. For instances in an Auto Scaling group, use the following Amazon EC2 Auto Scaling features instead of Amazon EC2 termination protection:
+    - To prevent instances that are part of an Auto Scaling group from terminating on scale in, use `instance protection`.
+    - suspend the `ReplaceUnhealthy` process.To specify which instances Amazon EC2 Auto Scaling should terminate first, choose a termination policy.
+  - by default, the asg in your Elastic beanstalk uses two cloudwatch alarms to trigger scaling operations (outbound network traffic)
+  - By default, security groups allow all outbound traffic.
+  - The default NACL allows all inbound and outbound IPv4 traffic and, if applicable, IPv6 traffic.
+  - By default, Amazon Simple Storage Service (Amazon S3) doesn't collect server access logs. When you enable logging, Amazon S3 delivers access logs for a source bucket to a target bucket that you choose.
+  - Create a new AMI from Amazon EBS snapshots that were created as backups
+  - Create a new AMI from Amazon EC2 instances that were launched before the deletion of AMI
+  - Elastic Load Balancing application load balancers add a trace ID to incoming HTTP requests in a header named X-Amzn-Trace-Id. Load balancers do not send data to X-Ray and do not appear as a node on your service map.
+  - x-ray: s3, api gateway, lambda
+  - `StatusCheckFailed`: Reports whether the instance has passed both the instance status check and the system status check in the last minute
+  - If you attempt to delete a stack with termination protection enabled, the deletion fails and the stack - including its status - remains unchanged
+
+
+
+
+
 
 
 
