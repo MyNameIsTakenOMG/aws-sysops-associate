@@ -2491,10 +2491,11 @@ create a Health Check that checks the alarm itself
 ## Tests reviews 2
 
 ### Table of Content
-- [practice test](#practice-test)
+- [practice exam](#practice-exam)
+- [practice test1](#practice-test1)
 
 
-#### practice test
+#### practice exam
 
 - Incorrect:
   - You must stop your Amazon EBS–backed instance before you can change its instance type. When you stop and start an instance, AWS moves the instance to new hardware; however, the instance ID does not change.
@@ -2528,6 +2529,82 @@ create a Health Check that checks the alarm itself
   - x-ray: s3, api gateway, lambda
   - `StatusCheckFailed`: Reports whether the instance has passed both the instance status check and the system status check in the last minute
   - If you attempt to delete a stack with termination protection enabled, the deletion fails and the stack - including its status - remains unchanged
+
+
+
+#### practice test1
+
+- incorrect:
+  - RDS read replicas errors:
+    - read replicas can only work on a transactional storage engine
+    - using unsage nondeterministic queries such as `SLEEP()`, `SYSDATE()` would break the replication
+    - when writing to tables on a read replica, it can break the application
+    - If the value for the `max_allowed_packet` parameter for a read replica is less than the `max_allowed_packet` parameter for the source DB instance, replica errors occur.
+    - The max_allowed_packet parameter is a custom parameter that you can set in a DB parameter group. The max_allowed_packet parameter is used to specify the maximum size of data manipulation language (DML) that can be run on the database. If the max_allowed_packet value for the source DB instance is larger than the max_allowed_packet value for the read replica, the replication process can throw an error and stop replication.
+  - errors like some resources created while other omitted when applying the same cloudformation template in different regions
+    - if it is because of the iam permissions, then the stack would not even be created at all
+    - if you define custom names for IAM resources, do not create multiple stacks resuing the same template. Because IAM resources must be globally unique within your account. Some shared resources among stacks can have unintended consequences from which you can't recover. For example, if you delete or update shared IAM resources in one stack, you will unintentionally modify the resources of other stacks.
+  - when sharing AMIs:
+    - You do not need to share the Amazon EBS snapshots that an AMI references in order to share the AMI. Only the AMI itself needs to be shared; the system automatically provides the access to the referenced Amazon EBS snapshots for the launch.
+    - You can only share AMIs that have unencrypted volumes and volumes that are encrypted with a customer-managed CMK
+  - AWS mfa does not support the use of your existing Gemalto device:
+    - because secrets cannot be shared with multiple parties
+    - but, you can re-use an existing U2F security key with aws mfa, as u2f security keys do not share any secrets between multiple parties 
+
+
+  
+- correct:
+  - when to automatically remediate an impaired instance, using AWS SSM automation document `AWSSupport-ExecuteEC2Rescue` to recover impaired instances
+  - A change set was successfully executed and this resulted in rest of the change sets being deleted by CloudFormation.
+  - After you execute a change, AWS CloudFormation removes all change sets that are associated with the stack because they aren't applicable to the updated stack.
+  - if a subnet **does not** have a route to the internet gateway, but has its traffic routed to a virtual private gateway for a site-to-site vpn connection, the subnet is known as a vpn-only subnet
+  - when integrating eventbridge rules and lambdas, the iam roles are not working, cuz it is not working for the events related to kinesis streams, and for lambdas or sns topics, we need to provide resource-based permissions
+  - If there is at least one healthy target in a target group, the load balancer routes requests only to the healthy targets. If a target group contains only unhealthy targets, the load balancer routes requests to the unhealthy targets. Hence, it is advised to configure an Auto Scaling Group, if the instances are hosting a business-critical application.
+  - Status checks are built into Amazon EC2, so they cannot be disabled or deleted.
+  - when working with cloudfront and custom origin:
+    - set up origin custom headers
+    - viewer protocol policy
+    - origin protocol policy
+  - s3 bucket access logging: free, object-level logs
+  - cloudtrail for s3: bucket-level logs
+  - AWS x-ray is not integrated with ALB, ALB only add a trace id in a http header: `X-Amzn-Trace-Id`, it doesn to send any data to x-ray
+  - for cloudwatch agent:
+    - the StatsD protocol: support Linux and window
+    - the coolectd: support only linux
+  - for asg scaling, using `instance scale-in protection` to control whether an Auto Scaling group can terminate a particular instance when scaling in. However, it does not protect instances from:
+    - manual termination from ec2 console, otherwise using EC2 termination protection
+    - health check replacement, otherwise suspending ReplaceUnhealthy process
+    - spot instance interruption
+  - in AWS, when two instances communicate using public ip addresses:
+    - in the same region, then it will stay in the aws network
+    - in the different regions, then it will stay in the aws network if vpc peering enabled
+    - in the different regions, then no guaranteed to stay in the aws network there is no vpc peering
+  - when asg throws an error like: `Client.InternalError: Client error on launch`, then:
+    - Auto Scaling group attempts to launch an instance that has an encrypted EBS volume, but the service-linked role does not have access to the customer-managed CMK used to encrypt it. Additional setup is required to allow the Auto Scaling group to launch instances. 
+  - On-Demand Capacity Reservations:
+    - Capacity Reservations do not offer any billing discounts. You can combine Capacity Reservations with Savings Plans or Regional Reserved Instances to receive a discount.
+    - On-Demand Capacity Reservations enable you to reserve capacity for your Amazon EC2 instances in a specific Availability Zone for any duration. This gives you the ability to create and manage Capacity Reservations independently from the billing discounts offered by Savings Plans or regional Reserved Instances.
+  - to get cloudwatch agent running on the ec2 instances:
+    - must attach the `CloudWatchAgentServerRole` iam role to the ec2 instance to be able to run the cloudwatch agent
+    - also need other permissions to allow cloudwatch agent to communicate with other aws services, like cloudwatch, etc
+  - for ebs volume resizing:
+    - after the system ebs volume being increased, you must use the file-system specific commands to extend the file system to the larger size
+  - AWS Directory Services:
+    - a managed service that automatically creates an AWS security group in your VPC with network rules for traffic in and out of AWS managed domain controllers.
+    - The default inbound rules allow traffic from any source (0.0.0.0/0) to ports required by Active Directory. These rules do not introduce security vulnerabilities, as traffic to the domain controllers is limited to traffic from your VPC, other peered VPCs, or networks connected using AWS Direct Connect, AWS Transit Gateway or Virtual Private Network.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
