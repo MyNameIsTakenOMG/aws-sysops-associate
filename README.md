@@ -2493,6 +2493,7 @@ create a Health Check that checks the alarm itself
 ### Table of Content
 - [practice exam](#practice-exam)
 - [practice test1](#practice-test1)
+- [practice test2](#practice-test2)
 
 
 #### practice exam
@@ -2595,15 +2596,59 @@ create a Health Check that checks the alarm itself
 
 
 
+#### practice test2
+
+- incorrect:
+  - to allow SSL connection to your RDS for postgresql, enable the rds.force_ssl parameter through the parameter groups page on rds console or cli
+  - ELB can handle the vast majority of use cases for the customers without requiring "pre-warming" (configuring the load balancer to have the appropriate level of capacity based on expected traffic). in some situations, like flash traffi, aws recommends that you contact aws to have your load balancer `pre-warmed`
+  - You can use a network address translation (NAT) gateway to enable instances in a private subnet to connect to the internet or other AWS services, but prevent the internet from initiating a connection with those instances.
+  - security groups are stateful so incoming connections can send a reply back to, regardless of any outbound rules
+  - You can share an AMI with specific AWS accounts without making the AMI public. All you need is the AWS account IDs. You can only share AMIs that have unencrypted volumes and volumes that are encrypted with a customer-managed CMK. If you share an AMI with encrypted volumes, you must also share any CMKs used to encrypt them.
+  - if your asg could not scale out:
+    - the maximum capacity is reached
+    - the launch process is suspended
+    - **NOTE**: if aws does not have the capacity for more requested ec2 instances, then we will get errors like `Your requested instance type (<instance type>) is not supported in your requested Availability Zone (<instance Availability Zone>)...`
 
 
-
-
-
-
-
-
-
+- correct:
+  - if asg terminate process is suspended, the asg will not scale in, but AZRebalance process is still active, but it will not function properly, because it will launch new instances without terminating the old ones, which will cause your Auto Scaling group to grow up to 10 percent larger than its maximum size because this is allowed temporarily during rebalancing activities.
+  - when cloudformation failed to receive a signal:
+    - the private subnet instance does not have connection to the cloudformation service
+    - the cfn-signal is not executed before the timeout of the wait condition
+  - Direct Connect is a physical connection
+  - To resolve CPU throttling, you can either enable T2/T3 Unlimited, or change the instance type.
+  - Classic Load Balancer Metrics:
+    - `SpilloverCount` represents the total number of requests that were rejected because the surge queue is full.
+    - `SurgeQueueLength` measures the total number of requests queued by your Classic Load Balancer
+  - deletion policy applied on resources
+  - aws storage gateway:
+    - file gateway: SMB and NFS-based
+    - volume gateway: iSCSI 
+    - tape gateway: enables you to replace using physical tapes on-premises with virtual tapes in AWS without changing existing backup workflows. 
+  - aws system manager inventory:
+    - to collect metadata from your managed instances
+    - Systems Manager Inventory collects only metadata from your managed instances. Inventory doesn't access proprietary information or data.
+  - for asg unhealthy instances:
+    - After an instance has been marked unhealthy because of a health check, it is almost immediately scheduled for replacement. It never automatically recovers its health.
+  - After you activate cost allocation tags, AWS uses the cost allocation tags to organize your resource costs on your cost allocation report, to make it easier for you to categorize and track your AWS costs.
+  - AWS Personal Health Dashboard provides alerts and remediation guidance when AWS is experiencing events that may impact you.
+  - While the Service Health Dashboard displays the general status of AWS services, Personal Health Dashboard gives you a personalized view into the performance and availability of the AWS services underlying your AWS resources.
+  - EBS volume:
+    - RAID 0: increase I/O performance
+    - RAID 1: fault tolarence 
+  - `InsufficientInstanceCapacity` error implies that AWS does not have the capacity to serve your request.
+  - `InstanceLimitExceeded` error implies that you have reached the limit on the number of instances that you can launch in a region
+  - asg: `ActiveConnectionCount` metric represents the total number of concurrent TCP connections active from clients to the load balancer and from the load balancer to targets.
+  - AWS OpsWorks is a configuration management service that provides managed instances of Chef and Puppet. Chef and Puppet are automation platforms that allow you to use code to automate the configurations of your servers.
+  - You can use CloudWatch dashboards to create customized views of the metrics and alarms for your AWS resources. we can create a graph per region using the region selector
+  - After you enable detailed monitoring, the Amazon EC2 console displays monitoring graphs with a 1-minute period for the instance.
+  - AMI IDs are region-specific and a different list of compliant AMI ID should be provided based on the region of where the script is executed
+  - aws inspector: a security assessment
+    - ec2
+    - ecr
+    - lambda
+  - aws guardduty: a threat detection
+  - To perform queries, you can connect to the reader endpoint, with Aurora automatically performing load-balancing among all the Aurora Replicas.
 
 
 
