@@ -2494,6 +2494,7 @@ create a Health Check that checks the alarm itself
 - [practice exam](#practice-exam)
 - [practice test1](#practice-test1)
 - [practice test2](#practice-test2)
+- [practice test3](#practice-test3)
 
 
 #### practice exam
@@ -2653,9 +2654,106 @@ create a Health Check that checks the alarm itself
 
 
 
+#### practice test3
+
+- incorrect:
+  - by default, aws aurora serverless connects to a proxy fleet of db instances that scales automatically, and there is no direct db instance to access and host the log files, so that we cannot view the logs directly through aurora console. So to enable logs, we need to modify the cluster parameter groups, like the `slow query log`, `general log`,`audit log`
+  - aws ec2 service can do several things when to interrupt a spot instance:
+    - stop
+    - hibernate
+    - terminate
+    - **NOTE**: it cannot reboot the spot instance
+  - with a Direct Connect, to connect a s3 bucket from a on-prem device, establish a cross-network connection and then create a public virtual interface for the connection, and then configure an end router for use with the public virtual interface.
+  - for Direct Connect:
+    - Public Virtual Interfaces: used to access aws public services
+    - Private Virtual Interfaces: used to access aws vpc with private ip addresses
+  - cloudwatch alarm actions include: ec2 instances restart
+  - s3 encryption options:
+    - sse-s3: Amazon S3-Managed Keys, AES-256
+    - sse-kms: Server-Side Encryption with Customer Master Keys (CMKs) stored in AWS Key Management Service (SSE-KMS) is similar to SSE-S3. SSE-KMS provides you with an audit trail that shows when your CMK was used and by whom.
+    - sse-c: you are responsible for managing the encryption keys, and Amazon S3 only handles the encryption and decryption process. 
+  - for aws secret manager:
+    - when deleting a secret, the secret will enter a 7-days recovery period.
+    - you can run api call `DeleteSecret` with parameter `ForceDeleteWithoutRecovery` to force to delete the secret
+  - for cloudformation:
+    - a `condition` cannot be applied to `parameter` section
+    - a `condition` can only be applied to the `resources` and `outputs` sections
 
 
-
-
+- correct:
+  - If you get intermittent 500 Internal Error responses from Amazon S3, you can retry the requests. These errors are rare and can occur during the normal use of the service.
+  - To monitor the number of 500 Internal Error responses that you're getting, you can enable Amazon CloudWatch metrics. Amazon S3 CloudWatch request metrics include a metric for 5xx server errors.
+  - ebs volume used as a root device can be encrypted
+  - the ebs snapshot stored in s3 can be accessed by ec2 api
+  - for elb and cloudtrail:
+    - when create a trail, we can enable continuous delivery of cloudtrail events to s3
+    - even if there is no trail configured, we can still view the most recent events in the cloudtrail console in event history
+  - ebs volume type:
+    - Throughput Optimized HDD (st1)
+    - Cold HDD (sc1)
+    - SSD-backed volumes optimized for transactional workloads involving frequent read/write operations with small I/O size, where the dominant performance attribute is IOPS.
+    - HDD-backed volumes optimized for large streaming workloads where throughput (measured in MiB/s) is a better performance measure than IOPS.
+  - S3 Replication Time Control (S3 RTC):
+    - helps you meet compliance or business requirements for data replication and provides visibility into Amazon S3 replication times. S3 RTC replicates most objects that you upload to Amazon S3 in seconds, and 99.99 percent of those objects within 15 minutes.
+    - S3 RTC by default includes S3 replication metrics and S3 event notifications, with which you can monitor the total number of S3 API operations that are pending replication, the total size of objects pending replication, and the maximum replication time. 
+  - Amazon S3 Inventory:
+    - one of the tools Amazon S3 provides to help manage your storage. You can use it to audit and report on the replication and encryption status of your objects for business, compliance, and regulatory needs.
+    - The inventory list contains a list of the objects in an S3 bucket and the metadata for each listed object.
+  - as AWS best practices:
+    - Enable MFA for privileged users
+    - Configure AWS CloudTrail to record all account activity
+  - for cloudfront key pair:
+    - cannot be created by iam users, must be root user
+  - for aws kms:
+    - when deleting a cmk, the key will be in a delete pending period of from 7 days to 30 days
+  - The only dimension that Amazon SQS sends to CloudWatch is QueueName.
+  - An Amazon EC2 Dedicated Host is a physical server with EC2 instance capacity fully dedicated to your use. Dedicated Hosts allow you to use your existing per-socket, per-core, or per-VM software licenses,
+  - Dedicated Instances are Amazon EC2 instances that run in a virtual private cloud (VPC) on hardware that's dedicated to a single customer. However, Dedicated Instances may share hardware with other instances from the same AWS account that are not Dedicated Instances.
+  - aws RDS:
+    - multi-az replication: synchronous
+    - read replicas replication: asynchronous
+  - to share cmk to another account:
+    - modify key policy to allow other accounts to use it
+    - modify iam policies in others accounts to delegate the key policy permissions to the iam roles or users
+  - Run the `AWSSupport-TroubleshootS3PublicRead` automation document on AWS Systems Manager to help diagnose issues with accessing objects from a public S3 bucket
+    - **noet**: this automation document does not evaluate the private objects
+  - when trying out a new version of aws rds db engine, you can create a snapshot of the existing db, and then create a new instance out of it, then apply the upgrade, and test on it before opting the updates on your existing db
+  - sse-kms: aws managed key, providing audit trail
+  - The `X-Forwarded-For` request header helps you identify the IP address of a client when you use an HTTP or HTTPS load balancer. Because load balancers intercept traffic between clients and servers, your server access logs contain only the IP address of the load balancer. To see the IP address of the client, use the `X-Forwarded-For` request header.
+  - a stack with termination protection can not be deleted
+  - To securely serve this private content by using CloudFront, you can do the following:
+    - Require that your users access your private content by using special CloudFront signed URLs or signed cookies.
+  - The IAM service supports only one type of resource-based policy called a role trust policy, which is attached to an IAM role.
+  - An IAM role is both an identity and a resource that supports resource-based policies.
+  - for vpc flow logs:
+    - After you've created a flow log, you cannot change its configuration or the flow log record format.
+    - Instead, you can delete the flow log and create a new one with the required configuration.
+  - If your Amazon S3 bucket is configured as a website endpoint, you can't configure CloudFront to use HTTPS to communicate with your origin because Amazon S3 doesn't support HTTPS connections in that configuration.
+    - but we can mandate viewers to send HTTPs requests to the cloudfront
+  - s3 encryption headers:
+    - sse-kms: 'x-amz-server-side-encryption': 'aws:kms'
+    - sse-s3: 'x-amz-server-side-encryption': 'AES256'.
+  - File gateway offers SMB or NFS-based access to data in Amazon S3 with local caching.
+  - A stack policy applies only during stack updates.
+  - for Elastic Beanstalk deployment strategies:
+    - rolling: a long deployment process with manual rollback
+    - rolling with extra batch: a longer process with manual rollback
+  - for termination of ec2, asg, spot instance:
+    - `DisableApiTermination`: protect ec2 instance from being shutdown via api calls (not from within the instance)
+    - `instance protection`: for asg scale-in behaviour
+    - cannot apply termination protection on spot instances
+  - for single tenant hardware:
+    - use Dedicated Instances
+  - when using aws organization:
+    - can create a trail to log all events for all accounts, which is call `organization trail`
+    - By default, CloudTrail tracks only bucket-level actions. To track object-level actions, you need to enable Amazon S3 data events
+    - Member accounts will be able to see the organization trail, but cannot modify or delete it. and they have no access to the logs for the trail
+  - Enable Enhanced Monitoring for your RDS DB instance
+    - Amazon RDS provides metrics in real time for the operating system (OS) that your DB instance runs on. You can view the metrics for your DB instance using the console.
+  - for retention of s3 bucket:
+    - When you apply a retention period to an object version explicitly, you specify a `Retain Until Date` for the object version
+    - Different versions of a single object can have different retention modes and periods 
+  - for ebs volume Size and I/O ratio:
+    - 1:50 for example: a 100 GiB volume size, the max IOPS possible is 100*50 = 5000 IOPS.
 
 
