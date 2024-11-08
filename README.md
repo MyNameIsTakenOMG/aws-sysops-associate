@@ -2495,6 +2495,7 @@ create a Health Check that checks the alarm itself
 - [practice test1](#practice-test1)
 - [practice test2](#practice-test2)
 - [practice test3](#practice-test3)
+- [practice test4](#practice-test4)
 
 
 #### practice exam
@@ -2756,4 +2757,234 @@ create a Health Check that checks the alarm itself
   - for ebs volume Size and I/O ratio:
     - 1:50 for example: a 100 GiB volume size, the max IOPS possible is 100*50 = 5000 IOPS.
 
+
+
+#### practice test4
+
+- incorrect:
+  - for file storage gateway and s3 security access:
+    - create vpc gateway endpoint for s3
+    - create a file gateway using the vpc endpoint
+  - for exporting dynamodb data from account A to a s3 bucket in account B:
+    - the objects are still owned by account A
+    - the export function does not write data with ALC bucket-owner-full-control
+    - **workaround**: to include the `PutObjectAcl` permission on all exported objects after the export is complete. 
+  - for IAM groups:
+    - groups can not be nested
+    - groups can be granted permissions using access control policies
+    - **NOTE**: you can not assign an IAM role to a group
+  - for ec2 instance ip addresses in vpc:
+    - ec2 and vpc by default use ipv4, you cannot disable it
+    - and you cannot associate or disassociate a public ip from your instances
+    - If the public IP address of your instance in a VPC has been released, it will not receive a new one if there is more than one network interface attached to your instance.
+    - when stopped, hibernate, terminated, the public ip will be released
+    - AWS releases your instance's public IP address when you associate an Elastic IP address with it. When you disassociate the Elastic IP address from your instance, it receives a new public IP address.
+    - When you launch an instance in a default VPC, AWS assigns it a public IP address by default. When you launch an instance into a non-default VPC, the subnet has an attribute that determines whether instances launched into that subnet receive a public IP address from the public IPv4 address pool. By default, AWS does not assign a public IP address to instances launched in a non-default subnet.
+  - for EFS mount helper:
+    - mounting with iam authorization -- You can use the EFS mount helper to mount your Amazon EFS file system on Linux instances using AWS Identity and Access Management (IAM) authorization.
+    - Auto-mounting when an EC2 instance reboots -- To automatically remount your Amazon EFS file system directory when the Amazon EC2 instance reboots, use the file /etc/fstab. The /etc/fstab file contains information about file systems.
+    - does not support windows-based instances
+    - options:
+      - mount on supported ec2
+      - mount with iam authorization
+      - mount with efs access points
+      - mount with an on-prem linux client
+      - auto-mount with ec2 reboots
+      - mount when a new ec2 launches
+  - for restore storage gateway:
+    - if a gateway vm failed, you need to activate a new gateway
+    - volume gateways:
+      - cached volumes gateway: recover data from a recovery snapshot
+      - stored volumes gateway: recover from most recent ebs snapshot of the volume
+    - tape gateway:
+      - recover one or more tapes from a recovery point to a new tape gateway
+    - if your file system gets  corrupted, you can use `fsck` command to repair it
+  - for aws config rules and notifications:
+    - AWS Config sends notifications only when the compliance status changes. If a resource was previously non-compliant and is still non-compliant, Config will not send a new notification. 
+  - for enforcing the creation of EFS that is encrypted at rest:
+    - Use the `elasticfilesystem:Encrypted` IAM condition key in AWS IAM identity-based policies to mandate users for creating only encrypted-at-rest Amazon EFS file systems.
+    - Define Service Control Policies (SCPs) inside AWS Organizations to enforce EFS encryption for all AWS accounts in your organization
+  - for cloudtrail log file integrity validation:
+    - When you enable log file integrity validation, CloudTrail creates a hash for every log file that it delivers. Every hour, CloudTrail also creates and delivers a file that references the log files for the last hour and contains a hash of each. This file is called a `digest file`. CloudTrail signs each digest file using the private key of a public and private key pair. After delivery, you can use the public key to validate the digest file.
+  - for elasticache redis multi-az:
+    - You can manually promote read replicas to primary on Redis (cluster mode disabled), only when Multi-AZ and automatic failover are disabled
+    - When choosing the replica to promote to primary, ElastiCache for Redis chooses the replica with the least replication lag
+    - unlike RDS, for multi-az configuration, redis replication is asynchronous
+    - when the primary node gets rebooted, the data will be clear, similar to the replicas
+    - custom-triggered reboot of primary node won't trigger automatic failover, but other reboots and failures will
+  - for a in-memory caching solution to scale out/in by adding or removing nodes:
+    - elasticache for memcached:
+      - simple model possible
+      - need to run large nodes with multiple cores or threads
+      - need to scale out/in by adding or removing nodes
+      - need to cache objects
+    - elasticache for redis:
+      - more complex than elasticache memcached
+  - for AWS health dashboard -- your account:
+    - AWS Personal Health Dashboard provides a personalized view of the health of the specific services that are powering your workloads and applications. Personal Health Dashboard proactively notifies you when AWS experiences any events that may affect you, helping provide quick visibility and guidance to help you minimize the impact of events in progress, and plan for any scheduled changes, such as AWS hardware maintenance.
+    - The AWS Health API provides programmatic access to the AWS Health information that appears in the AWS Personal Health Dashboard. You can use the API operations to get information about events that might affect your AWS services and resources.
+    - **note**: you must have a business or enterprise support plan to use aws health api or will get `SubscriptionRequiredException` error
+
+
+- correct:
+  - when ebs volume shows `error` status, which indicates that the underlying hardware related to the volume has failed, the data is not recoverable, but we can restore from our backup
+  - for storage gateway cache disk:
+    - if the current the cache disk does not meet your requirements, then you must create a new gateway with the cache space you need
+  - for aws config rules:
+    - it can be triggered by `configuration changes` or `periodic`
+    - thus, no need to create two identical rules for different triggers
+  - for ephemeral ports:
+    - linux kernel: 32768-61000
+    - ELB, NAT gateway, Lambda function: 1024-65535
+    - windows server 2003: 1025-5000
+    - windows server 2008: 49152-65535
+  - for EBS type:
+    - io1/io2
+    - gp2/gp3
+    - st1: good for frequently accessed, throughput intensive workloads with large datasets, like ETL, data warehouse, kafka,...
+    - sc1: good for less frequently accessed, cold datasets
+  - for s3 glacier and s3 glacier deep archive:
+    - offer 10GB retrieval free tier per month
+  - for cloudformation stackset:
+    - a trust relationship should be set between admin account and target accounts
+    - for service-managed permissions, no need to manually create iam roles
+    - when deleting stacks from your stack set by choosing the `retain stacks` option, then the stack will run outside of your stack set and managed by cloudformation
+  - for aurora db cluster in vpc:
+    - to connect to aurora db cluster, db instance must have a public ip
+    - db instance must be in a public subnet
+    - instead of specifying a subnet, create a db subnet group
+    - also enable DNS resolution and DNS hostname in vpc
+  - for aws service catalog sharing:
+    - account-to-account sharing (in-sync)
+    - organizational sharing (in-sync)
+    - deploying catalogs using stack sets in other account (not in-sync)
+  - for aws config not react to the deletion of ebs volume instantly:
+    - when ebs volume is deleted using `deleteOnTermination` attribute set to true, or or the api call `TerminateInstances`, it will not publish the `DeleteVolume` api call, which will be used by Aws config
+  - for ec2 auto scaling service-linked roles:
+    - by default, it does not include permissions to access cmk
+    - go to aws kms to modify key policy to allow service-linked roles to allow to launch instances
+  - the snow family devices offer a user-friendly tool, aws opshub
+    - graphical user interface
+    - all snowball apis
+  - for RDS proxy:
+    - enables multiple application connections to share a database connection for efficient use of database resources.
+    - allows customers to maintain predictable database performance by regulating the number of database connections that are opened.
+    - removes unserviceable application requests to preserve the overall performance and availability of the application.
+  - for aws system manager:
+    - you can manage servers running on AWS, in your on-premises data center, and devices such as Raspberry Pi through a single interface. 
+  - for network load balancer and AZ:
+    - You cannot disable Availability Zones for a Network Load Balancer after you create it, but you can enable additional Availability Zones.
+  - for the first access Latency of new EBS volume created from a snapshot:
+    - Access each block before putting the volume into production. This process is called initialization (formerly known as pre-warming).
+    - Enable fast snapshot to restore on a snapshot to ensure that the EBS volumes created from it are fully-initialized at creation and instantly deliver all of their provisioned performance. (expensive)
+  - for aurora cluster metrics:
+    - AuroraReplicaLagMaximum: maximum amount of lag 
+    - AuroraBinlogReplicaLag: amount of time
+    - AuroraReplicaLag: amount of lag when replicating updates from primary db instance
+    - InsertLatency: average duration of insert operations.
+  - for s3 bucket owner and objects owners:
+    - the bucket owner has no permissions on objects owned by other aws accounts
+    - the objects owners must first grant permission to the bucket owner, then the bucket owner can then delegate those permissions.
+  - dynamodb integrate with the relational database systems:
+    - using dynamodb stream and lambda
+    - 3 interoperation must be provided:
+      - fill the dynamodb cache incrementally
+      - write through a dynamodb cache
+      - update dynamodb from sql system
+  - for aws artifact:
+    - go-to, central resource for compliance-related information that matters to your organization. 
+  - for cloudHSM:
+    - A hardware security module (HSM) is a specialized security device that generates and stores cryptographic keys.
+    - You should use AWS CloudHSM when you need to manage the HSMs that generate and store your encryption keys.
+  - for EFS metrics:
+    - `ClientConnections`: indicates how many users are connected to the efs system
+    - `TotalIOBytes`: determin the throughput
+    - `BurstCreditBalance`: burst credit balance
+  - aws FSx windows file server:
+    - fully managed Windows file servers with features and performance optimized for "lift-and-shift" business-critical application workloads including home directories (user shares), media workflows, and ERP applications. (NTFS, SMB)
+  - for asg Scaling strategies:
+    - dynamic scaling:
+      - scaling on demand: scale the capacity in response to changing demand
+      - scaling on a schedule
+    - predictive scaling
+  - for aws shield advanced:
+    - you get `DDoS cost protection for scaling`, a feature that protects your AWS bill from usage spikes on your AWS Shield Advanced protected EC2, Elastic Load Balancing (ELB), Amazon CloudFront, AWS Global Accelerator, and Amazon Route 53 resources as a result of a DDoS attack.
+    - have exclusive access to advanced, real-time metrics and reports for extensive visibility into attacks on your AWS resources.
+  - for s3 bucket static website config:
+    - When you configure an Amazon S3 bucket for website hosting, you must give the bucket the same name as the record that you want to use to route traffic to the bucket.
+  - for AMI virtualization types:
+    - paravirtual (PV): not supported in all aws regions, thus will cause errors when copying amis to some regions. if got an error, try to create a HVM instance, and then attach a new EBS volumes to the instance, then copy the data from the PV instance EBS volume
+    - hardware virtual machine (HVM)
+  - for SSL certificates:
+    - Amazon-issued certificates can’t be installed on an EC2 instance.
+    - to enable SSL on ec2 instances, we must use 3rd-party SSL certificate, then associate the certificate with a load balancer by importing it into aws acm
+  - for ACM: (does not support amazon-issued certificates on EC2 instance)
+    - ELB
+    - cloudfront
+    - elastic beanstalk
+    - app runner
+    - api gateway
+    - cloudformation
+    - nitro enclaves
+  - for a certificate not visible in ACM for an ALB:
+    - to use 3rd-party certificate with a load balancer, you can either import the certificate into ACM or upload a certificate to AWS iam
+    - if you could not find the imported certificate in acm,
+      - make sure the acm certificate and your load balancer are in the same aws region
+  - for cloudfront and alb : sticky session:
+    - make sure to configure cloudfront cache behavior to forward all cookies to the origin
+    - cookie forwarding behaviors:
+      - forward all
+      - forward based on whitelist
+      - do not forward
+  - for s3 access points:
+    - a feature of S3 that simplifies managing data access at scale for applications using shared data sets on S3.
+    - unique hostnames that customers create to enforce distinct permissions and network controls for any request made through the access point. 
+    - Each S3 Access Point is configured with an access policy specific to a use case or application.
+    - an s3 access point can limit all s3 storage access to happen from a vpc
+  - for efs access points:
+    - Amazon EFS access points are application-specific entry points into an EFS file system that makes it easier to manage application access to shared datasets.
+    - Access points can also enforce a different root directory for the file system so that clients can only access data in the specified directory or its subdirectories. (using iam policies)
+  - to apply alternative domain name to your cloudfront distribution:
+    - register a custom domain name via route53 or other registars
+    - get ssl/tls certificate from a CA, and add the certificate to the cloudfront distribution
+  - for cloudfront returning 404 responses:
+    - cloudfront always caches a few of the http 4xx or 5xx status codes returned by your origin.
+    - but, it does not generate 404 responses
+    - If a requested object isn't found in a CloudFront cache, the request is sent to the origin and the origin generates the 404 response if the object is not found on the origin server as well.
+  - for aws secrets manager built-in rotation support:
+    - RDS
+    - DocumentDB
+    - Redshift clusters
+  - for the metric : `HTTPCode_ELB_4XX_Count` in the namespace: `AWS/ApplicationELB`
+    - The number of HTTP 4XX client error codes that originate from the load balancer.
+    - **note**: This count does not include response codes generated by targets. because these requests were not received by the target since these are malformed or incomplete, other than in the case where the load balancer returns an HTTP 460 error code.
+  - for cloudtrail enabled on an aws account that spans across multi-region:
+    - deliver log files from multiple regions to a single S3 bucket for a single account.
+    - CloudTrail will record and process the log files in each region and will deliver log files containing account activity across all AWS regions to a single S3 bucket and a single CloudWatch Logs log group.
+  - for aws waf:
+    - cloudfront distribution
+    - api gateway
+    - ALB
+    - appsync
+  - for aws firewall manager:
+    - a security management service that allows you to centrally configure and manage firewall rules across your accounts and applications in `AWS Organizations`.
+    - aws firewall manager is integrated with `aws organization`, so you can enable AWS WAF rules, AWS Shield Advanced protection, security groups, and AWS Network Firewall rules for your Amazon VPC across multiple AWS accounts and resources from a single place. (so there is no need to export configurations manually)
+  - for cloudtrail log files encryption & digest files
+    - when enable cloudtrail log file integrity validation,
+    - for log files: by default using sse-s3 encryption, but can configure using aws sse-kms
+    - **note**: for the digest files, it is using sse-s3
+  - for ACM certificate:
+    - cannot use for email encryption
+    - only for ssl/tls protocols
+    - cannot request certificates for amazon-issued domain, like `amazonaws.com` or `cloudfront.net`
+    - cannot install acm certificates on ec2 instances, instead, can install on any integrated services, like cloudfront, elb, etc
+    - the private key cannot be downloaded
+
+
+
+
+
+
+
+      
 
