@@ -3322,13 +3322,328 @@ create a Health Check that checks the alarm itself
       - RDS with cloudwatch
         - metrics associated with RDS
         - `enhanced monitoring` (gathered from an agent on the DB instance): system-level metrics
+    - aurora:
+      - HA & read scaling: 6 copies across 3 az
+        - 4/6 write
+        - 3/6 read
+        - up to 15 read replicas
+        - support cross region replication
+      - writer endpoint, reader endpoint
+      - backups, backtracking, & restores, db clone(create a test environment using production data)
+      - for SysOps: priority(0-15, high-low)
+      - cloudwatch metrics
+      - RDS & aurora security
+    - elasticache: must have an invalidation strategy to make sure only the most current data is used in there
+    - elasticache redis: multi-az,read replicas, backup&restore
+      - cluster mode: one shard, up to 5 nodes, each node has all the data, multi-az by default for failover
+      - vertical scale up: create a new node group and replicate data
+      - cluster mode enabled: data is partitioned across shards, up to 500 nodes per cluster
+      - auto scaling: support Target tracking and shedule scaling
+        - online scaling
+        - offline scaling
+      - connection endpoints:
+        - cluster enabled: configuration endpoint, node endpoint
+        - disabled: primary endpoint, reader endpoint, node endpoint
+        - standalone node
+      - metrics:
+        - evictions
+        - cpu utilization
+        - swap usage: should not exceed **50 MB**
+        - ...
+    - elasticache memcached: multi-node, no HA, no persistent, no backup&restore, multi-threading
+      - scaling: horizontal(auto-discovery), vertical(create a new cluster)
+      - metrics:
+        - evictions
+        - cpu utilization
+        - swap usage: should not exceed **50 MB**
+        - currconnections
+        - ...
   - aws monitoring, audit & performance
+    - cloudwatch:
+      - metrics: metrics have timestamps (cloudwatch may aggregate multiple metric data points if they are sent at the same point at second granularity level)
+      - ec2 detailed monitoring: 1-min resolution
+      - custom metrics:
+        - important: accepts data points 2 weeks in the past to 2 hrs in the future
+      - dashboards: global, can include graphs from different aws accounts and regions
+      - logs: log groups, log stream
+      - log insights
+      - log -- s3 export: not near-real time
+      - log -- logs subscriptions: real-time . **subscription filter**, across account
+      - alarms:
+        - targets: ec2, asg, SNS
+        - composite alarms: reduce "alarm noise"
+        - ec2 instance recovery: same private, public, EIP, metadata, and placement group
+        - can be created based on cloudwatch logs metrics filters
+      - Synthetics canary: aws version of e2e tests
+        - blue print: heartbeat monitor, api canary, broken link checker, visual monitoring, canary recorder, gui workflow builder
+      - eventbridge
+        - schema registry
+        - resource-based policy
+      - service quotas cloudwatch alarms
+        - or trusted advisor + cw alarms (limited number of service limits checks)
+    - cloudtrail
+      - trail: applied to all regions(default) or one region
+      - events:
+        - management events
+        - data events (not enabled, due to high volume operations)
+        - cloudtrail insights events: unusual activity
+        - retention: 90 days --> s3 bucket
+      - log file integrity validation:
+        - digest file
+      - trail is not real-time, integrated with eventbridge
+      - organization trail
+        - a trail will log all events for all accounts in an aws organization
+        - member accounts can only view it (not modify)
+    - aws config
+      - auditing and recording compliance of aws resources
+      - rules do not prevent actions
+      - view compliance, configuration, cloudtrail api calls
+      - rules remediations: ssm document
+      - rule notification
+      - aggregators
   - account management
+    - health dashboard -- service history
+    - health dashboard -- your account: alert, remediation, proactive, scheduled activities
+    - **health event notifications: integrated with eventbridge**
+    - aws organization:
+      - global service
+      - consolidated billing
+      - `reserved instances`, `saving plans` are shared across accounts, the payer account(master account) can turn off sharing
+      - security: service control policies(not applied to management account)
+      - IAM policies: use `aws:PrincipalOrgID` in resource-based policies
+      - tag policies: help standardize tags across resources in an aws organization
+      - aws control tower: run on top of aws organization. create aws organizations based on best practices with SCPs
+      - aws service catalog: portfolio(collection of products: cloudformation templates)
+        - sharing: share a reference (stay in sync), or deploy a copy to other accounts
+        - tag options library: help manage tags on provisioned resources(products)
+    - billing alarms: metric stored in us-east-1, actual cost
+    - cost explorer: understand and manage aws costs and usage over time with reports
+    - aws budgets: can set an alarm on a budget
+    - cost allocation tags: track aws costs on a details level
+      - aws generated tags
+      - user-defined tags
+    - cost and usage report: dive deeper into aws costs and usage with the most comprehensive set of aws cost and usage data
+    - aws compute optimizer: Reduce costs and improve performance by recommending optimal AWS resources for your workloads
+      - supported resources:
+        - ec2
+        - asg
+        - ebs
+        - lambda    
   - disaster recovery
+    - aws dataSync: file permissions and metadata are preserved; s3, efs, fsx
+    - aws backup: managed service, support cross-region, cross-account
+      - on-demand; scheduled
+      - backup plans: frequency, backup window, transition to cold storage, retention period
+      - vault lock: WORM, cannot changed even by root users
+  - security & compliance
+    - aws shared responsibility model
+    - DDoS protection on AWS:
+      - aws shield standard: layer 3, layer 4
+      - aws shield advanced: 24/7 premium DDoS protection, support team, protect against higher fees during the attack
+      - aws waf: rules, layer 7, define web ACL
+        - rate-based (DDoS)
+        - Ip, Http headers, body, url strings
+        - sql injection, xss
+        - geo-match, size constraints
+      - cloudfront and route 53: cdn, combined with aws shield
+      - leverage aws auto scaling
+    - penetration testing on aws cloud: ec2, nat gateway, elb, rds, cloudfront, aurora, api gateway, lambda, lightsail, EB
+    - aws inspector: security assessment
+      - ec2, ecr container images, lambda
+      - security hub, eventbridge
+    - aws guardduty: threat discovery
+      - cloudtrail events logs, vpc flow logs, dns logs, ...
+      - can protect against cryptocurrency attack (has a dedicate finding for it)
+    - aws macie: data security and privacy service scanning sensitive data like PII in s3 buckets
+    - trusted advisor: aws account assessment
+      - recommendation on 6 categories: cost optimization, performance, security, fault tolerance, service limits, operational excellence
+      - business & enterprise support plan: full set of checks; programmatic access using aws support api
+    - aws kms:
+      - kms keys -- kms custom master key
+      - symmetric, asymmetric
+      - types: aws owned keys, aws managed keys, cmk in kms or imported
+      - automatic key rotation: imported kms key only manual, cmk must enable
+      - key policies: similar to s3 bucket policies, but must have
+      - kms auto key rotation: cmk optionally enabled, previous key is still active
+      - kms on-demand key rotation: for cmk, not aws managed cmk; limited times for rotation
+      - cmk symmetric key & imported: keep the previous key
+      - kms alias updating(hide the actual key ID)
+      - sharing kms encrypted rds db snapshots
+      - key deletion: `pending deletion` period
+      - CLoudHSM: AWS provisions encryption hardware
+        - kms: AWS manages the software for encryption
+        - good option to use with sse-c
+        - HA
+        - integrated with kms
+    - aws artifact: self-service portal for fetching aws compliance documents and agreements
+    - aws ACM:
+      - integrated with: elb, cloudfront distribution, api gateway
+      - cannot used with ec2
+      - not work with aws-issued domain name
+      - public certificates auto-renew
+      - can import cert, then no auto-renew, acm sends notification, aws config has a managed rule
+      - integrated with api gateway
+        - edge-optimized: the tls cert must be in the same region as cloudfront distro in us-east-1
+        - regional: the tls cert must be imported on the api gateway
+    - ssm parameter store
+      - integrated with cloudformation
+      - standard and advanced tiers(parameters policies for TTL)
+    - aws secrets manager
+      - storing secrets, auto-rotation,
+      - for rds, redshift,documentDB...
+      - multi-region secrets replication
+      - more expensive than SSM parameter store
+      - rotation (with a lambda, compared to ssm parameter store using eventbridge)
+      - monitoring: cloudtrail, cloudwatch
+        - cloudtrail: capture non-api events
   - identity
+    - iam security tools:
+      - iam credential report (account-level)
+      - iam access advisor (user-level)
+    - iam access analyzer: define `zone of trust` (account or organization)
+    - identity federation: allow outside users to temporarily access aws resources
+    - aws cognito -- federated identity pool for public applications
+    - aws sts: allow to grant limited and temporary access to aws resources
+      - assume a role within your account
+      - cross-account access with sts
+    - cognito user pool: create a serverless database for web & mobile apps
+    - cognito user pool -- integrations: api gateway and alb
+    - cognito identity pools: get identities for 'users' so they obtain temporary aws credentials (using sts to get temp creds)
+    - cognito identity pools -- integrated with cognito user pool
+    - cognito identity pools -- iam roles: the roles must have a 'trust' policy of cognito identity pools
+    - cognito user pools (authentication) vs identity pools (authorization)
   - vpc
+    - public vs private ip addresses
+      - private: 10.0.0.0/8; 172.16.0.0/12; 192.168.0.0/16
+    - default vpc: internet connectivity, ec2 public ipv4 address
+    - VPC: soft limit: 5 subnets
+      - aws reserves 5 ip addresses: first 4 and last 1
+      - internet gateway per vpc (need route table)
+      - bastion hosts(ssh to the private subnet ec2)
+      - nat instance (outdated, must disable ec2 source/destination check, and EIP, sg, not HA)
+      - nat gateway: aws managed nat, no need sg, only in one az
+      - DNS resolution in VPC
+        - enableDnsSupport: enable route53 for the vpc
+        - enableDnsHostnames: assign a public hostname to ec2 if it has a public ip
+        - both properties must be true if working with route53 private hosted zone
+      - NACL and sg:
+        - newly  NACL deny everything
+        - default NACL allow everything
+        - ephemeral ports:
+          - linux: 32768 – 60999
+          - windows: 49152–65535
+        - NACL support allow and deny, stateless, sg support allow only, stateful
+      - Reachability Analyzer: A network diagnostics tool that troubleshoots network connectivity between two endpoints in your VPC(s)
+      - vpc peering:
+        - between different accounts/regions
+        - can reference a sg in a peered vpc
+        - cidr must not be overlapped
+        - vpc peering is not transitive
+      - vpc endpoints:
+        - interface endpoint(powered by aws privatelink, EIP)
+        - gateway endpoint (s3, dynamodb, free)
+        - gateway or interface endpoint for s3:
+          - from within a vpc, using gateway endpoint
+          - from Direct connect, s2s vpn, using interface endpoint(powered by aws privatelink)
+        - lambda in vpc accessing dynamodb
+          - using gateway endpoint
+          - access from public internet (nat gateway, internet gateway)
+      - vpc flow logs
+      - aws s2s vpn (still using public internet)
+        - virtual private gateway on aws side
+        - custom gateway on customer side
+      - aws vpn cloudhub: connect to multiple sites
+      - direct connect (DX): dedicated private connection
+        - access public and private resources on the same connection
+        - public virtual interface (public resources)
+        - private virtual interface (vpc resources)
+      - direct connect gateway: connect to mutliple vpcs **in the same account**
+      - direct connect -- connection types
+        - dedicated
+        - hosted
+      - direct connect -- encryption
+        - not encrypted in transit but is private
+        - using vpn to encrypt data
+      - direct connect -- resiliency
+        - one connection to mutliple on-prem sites
+        - multi connections to multiple on-prem sites
+      - s2s vpn as a backup for direct connect
+      - aws privatelink: expose a service to 1000s of VPCs
+        - no need vpc peering, internet gateway, nat,...
+        - require nlb and eni
+      - ec2-classic & aws classiclink (outdated): ClassicLink allows you to link EC2-Classic instances to a VPC in your account
+      - transit gateway: For having transitive peering between thousands of VPC and on-premises, hub-and-spoke (star) connection
+        - work with direct connect, vpn
+      - Transit Gateway: Site-to-Site VPN ECMP(Equal-cost multi-path routing)
+        - Routing strategy to allow to forward a packet over multiple best path, increasing bandwidth
+      - Transit Gateway – Share Direct Connect between multiple accounts combining direct connect gateway
+      - vpc -- traffic mirroring: Allows you to capture and inspect network traffic in your VPC (similar to gateway load balancer)
+      - ipv4 cannot be disabled, but not for ipv6
+      - egress-only internet gateway: only for ipv6, allow outbound traffic
+    - networking costs:
+      - private ip > public ip
+      - same az / region > different region
+      - egress traffic: data transffering out
+      - direct connect location in the same location
+    - s3 data transfer pricing:
+      - ingress free,
+      - to internet $
+      - s3 transfer acceleration $$
+      - to cloudfront free
+      - cloudfront to internet > s3 to internet
+    - vpc network protection:
+      - network firewall: from layer3 to layer7
+        - any direction
+        - using gateway load balancer
+        - centrally managed cross-account by aws firewall manager to apply to many vpcs
+        - support 1000s rules
+        - traffic filtering: allow, drop, alert
+        - active flow inspection (like gateway load balancer, by managed by aws)
+        - send logs to s3, cloudwatch logs, kdf 
   - route 53
+    - terminologies: domain registar, dns records, zone file(contain dns records), name server, tld, sld
+    - ability to check the health of your resources, 100% sla
+    - records: domain name, record type(A, AAAA, Alias, CNAME, NS,...), value, routing policy, ttl
+    - hosted zones: $0.5 per hosted zone
+      - public zone
+      - private: vpc
+    - TTL: not for Alias records
+    - CNAME vs Alias
+    - Alias: an extension to DNS functionality
+      - target: elb, api gateway, cloudfront distro, s3 website, vpc interface endpoint, global accelerator, route53 record in the same zone. **NOTE**: no alias for ec2 dns name
+    - health checks: only for public resources; integrated with cloudwatch metrics(full control); auto-failover
+      - about 15 global health checkers to check the endpoint
+      - pass when 2xx and 3xx
+      - can be setup based on the first 5120 bytes of responses
+      - calculated health checks (similar to composed alarms)
+      - using cloudwatch metrics to check private vpc resources
+    - routing policies
+      - simple: route traffic to a single resource; no health check;
+      - multi-value: multiple values returned, a random one will be picked by client
+      - weighted: set a record 0 to stop traffic, set all records 0, return evenly; no need to be 100 when summed up; support health check; records must have the same name and type; use case: ELB 
+      - failover: active-passive
+      - latency based: support health check; route based on the latency between users and aws regions
+      - geolocation: different from latency-based; based on continent, country
+      - geoproximity: route traffic based on location of users and resources
+        - shift traffic based on defined `bias` (must use Route53 traffic flow to use this feature)
+      - IP-based routing: based on client's ip addresses (providing a list of CIDRs for your clients)
+    - traffic flow: visual editor to manage complex routing decision trees
+      - configurations can be saved as traffic flow policy
+    - s3 website with route 53:
+      - alias record: make sure the record name is the same as bucket name
+    - route53 -- hybrid DNS: to resolve vpc, peered vpc, on-prem network
+    - route53 -- resolver endpoints
+      - inbound endpoint: our dns resolvers to route53 resolvers
+      - outbound endpoint: route53 resolvers to our dns resolvers using `resolver rules`
+        - resolver rules:
+          - conditional forwarding rules: forward queries for domain or subdomain to our dns resolvers
+          - system rules: override forwarding rules, like do not forward certain subdomain
+          - auto-defined system rules: aws internal domain names, private hosted zones 
+          - choose the most specific match if multiple matches
+          - can be shared across account using AWS RAM
   - other services
+    - x-ray
+    - amplify
 
 
 
