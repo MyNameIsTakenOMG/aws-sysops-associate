@@ -2984,7 +2984,11 @@ create a Health Check that checks the alarm itself
 
 ### Last review
 
-- lecture:
+- table of content
+  - [Lecture](#lecture)
+  - [Tests](#tests)
+
+- #### Lecture:
   - ec2:
     - change instance type only works for ebs backed instances
     - enhanced networking: high bandwidth, high packet per second
@@ -3646,8 +3650,8 @@ create a Health Check that checks the alarm itself
     - amplify
 
 
+- #### Tests:
 
-
-
+  - 
       
 
