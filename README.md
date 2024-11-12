@@ -3745,11 +3745,62 @@ create a Health Check that checks the alarm itself
   - for EB deployment, rolling and rolling with additional batch need manual redeploy for rolling back
   - organizational trail: memeber accounts can view but not modify
   - ebs IOPS and volume size: 50:1
-
-
-
-
-
+  - asg can grow up to 10% of its size when rebalancing, especially the termination process is suspended
+  - CLB metrics: `SpilloverCount`, `SurgeQueueLength`
+  - AWS Systems Manager Inventory provides visibility into your Amazon EC2 and on-premises computing environment. You can use Inventory to collect metadata from your managed instances.
+  - AWS Personal Health Dashboard provides alerts and remediation guidance when AWS is experiencing events that may impact you.
+  - ELB can handle the vast majority of use cases for the customers without requiring "pre-warming" (configuring the load balancer to have the appropriate level of capacity based on expected traffic).
+    - however, in certain cases, when flash traffic is expected, then you need to contact aws to have your load balancer `pre-warmed`
+  - ELB metrics: `ActiveConnectionCount`
+  - OpsWorks lets you use Chef and Puppet to automate how servers are configured, deployed and managed across your Amazon EC2 instances or on-premises compute environments.
+  - to share AMI, edit the account list from AMI console UI
+  - An Amazon Inspector assessment report can be generated for an assessment run once it has been successfully completed.
+  - for asg, if there is no scaling actions taken place for too long:
+    - the launch process has been suspended
+    - reached the max capacity
+    - **NOTE**: if aws does not have the capacity for the requested ec2 instances, then it will throw an error
+  - Alarms continue to evaluate metrics against your chosen threshold, even after they have already triggered. This allows you to view its current up-to-date state at any time.
+  - RDS read replicas errors:
+    - try to write into read replicas
+    - the value `max_allowed_packet` on read replicas is less than that of the primary db instance
+  - when applying the same cloudformation template to different regions, and some resources are omitted, then:
+    - may have some resources that need unique name, like iam resources, s3 buckets
+    - **NOTE**: if it is the issue of iam permission, then the stack won't even be created at all
+  - when sharing AMI, no need to share the underlying ebs snapshot, the system will take care of the snapshot for you
+  - AWS mfa does not support the existin Gemalto device
+    - you can re-use the existing U2F security key(will not share any secrets between parties)
+  - when changing the instance type of ebs backed, stop the instance, then change it, aws will move the instance to a new hardware but the instance ID will not be changed
+    - if it is in the asg, then must suspend the scaling process, or it will be terminated
+  - for EB, to decouple a RDS, using blue/green deployment
+  - for SSM, use document: `AWSSupport-ExecuteEC2Rescue` to recover impaired instances
+  - when all other changesets are gone, that is because a changeset has been executed successfully
+  - regardless the type of subnet, a private ipv4 is private anyway
+  - lambda -- resource-based policy
+  - in EB, change the health check type from ec2 to eLB
+  - ec2 status check is a built-in feature, cannot be disabled
+  - when s3 bucket is configured as a website, connect s3 bucket as a custom origin with cloudfront, and restrict the access to the content by setting up custom headers
+  - for cloudwatch agent:
+    - statsD
+    - collectd: only support linux
+  - traffic between ec2 in the same aws region, using aws network
+  - traffic in different region, using aws network if vpc-peering, otherwise, no guaranteed
+  - asg launch error: try to launch an encrypted ebs volume
+  - Stack policies help protect critical stack resources from unintentional updates that could cause resources to be interrupted or even replaced.
+  - Scheduled events are managed by AWS, you cannot configure scheduled events for your instances
+  - Configure the "Retain Until Date" in the object lock settings to a date that is 5 years from the object creation date and create a lifecycle policy to delete the object 5 years after the object is created
+  - capacity reservation has no discount, only require capacity for some time in a certain az.
+    - combine with Reserved-instance, Saving-plan
+  - cloudfront -- invalidation
+  - asg launch encrypted ec2 instances:
+    - in the same account, update service-linked role to use the key
+    - in different accounts, create a role in the asg account, then create a grant to allow service-linked role to use the cmk
+  - ec2 needs role to run cloudwatch agent
+  - iam groups have policies called group policies
+  - after resizing ebs, you must resize the file system
+  - to use enhanced networking:
+    - packet-per-second rate is near or exceeding 20k packets per second on the VIF driver
+  - AWS Directory Services is a managed service that automatically creates an AWS security group in your VPC with network rules for traffic in and out of AWS managed domain controllers.
+  - AWS Trusted Advisor checks for service usage that is more than 80% of the service limit.
 
 
 
